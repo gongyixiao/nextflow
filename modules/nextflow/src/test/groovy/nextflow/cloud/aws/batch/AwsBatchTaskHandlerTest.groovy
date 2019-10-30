@@ -33,6 +33,8 @@ import com.amazonaws.services.batch.model.RetryStrategy
 import com.amazonaws.services.batch.model.SubmitJobRequest
 import com.amazonaws.services.batch.model.SubmitJobResult
 import com.amazonaws.services.batch.model.TerminateJobRequest
+import nextflow.cloud.types.CloudMachineInfo
+import nextflow.cloud.types.PriceModel
 import nextflow.exception.ProcessUnrecoverableException
 import nextflow.executor.Executor
 import nextflow.processor.BatchContext
@@ -666,13 +668,14 @@ class AwsBatchTaskHandlerTest extends Specification {
         def trace = handler.getTraceRecord()
         then:
         1 * handler.isCompleted() >> false
-        1 * handler.getInstanceType() >> 'x1.large'
+        1 * handler.getMachineInfo() >> new CloudMachineInfo('x1.large', 'us-east-1b', PriceModel.spot)
         
         and:
         trace.native_id == 'xyz-123'
         trace.executorName == 'awsbatch'
-        trace.machineType == 'x1.large'
-
+        trace.machineInfo.type == 'x1.large'
+        trace.machineInfo.zone == 'us-east-1b'
+        trace.machineInfo.priceModel == PriceModel.spot
     }
 
 }

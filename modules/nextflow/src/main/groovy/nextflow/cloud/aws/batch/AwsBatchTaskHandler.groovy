@@ -39,6 +39,7 @@ import com.amazonaws.services.batch.model.SubmitJobRequest
 import com.amazonaws.services.batch.model.TerminateJobRequest
 import com.amazonaws.services.batch.model.Volume
 import groovy.util.logging.Slf4j
+import nextflow.cloud.types.CloudMachineInfo
 import nextflow.exception.ProcessUnrecoverableException
 import nextflow.executor.res.AcceleratorResource
 import nextflow.processor.BatchContext
@@ -85,7 +86,7 @@ class AwsBatchTaskHandler extends TaskHandler implements BatchHandler<String,Job
 
     private String queueName
 
-    private String instanceType
+    private CloudMachineInfo machineInfo
 
     private Map<String,String> environment
 
@@ -597,20 +598,20 @@ class AwsBatchTaskHandler extends TaskHandler implements BatchHandler<String,Job
     }
 
 
-    protected String getInstanceType() {
-        if( instanceType )
-            return instanceType
+    protected CloudMachineInfo getMachineInfo() {
+        if( machineInfo )
+            return machineInfo
         if( queueName && taskArn ) {
-            instanceType = executor.getInstanceTypeByQueueAndTaskArn(queueName, taskArn)
-            log.debug "[AWS BATCH] jobId=$jobId; queue=$queueName; task=$taskArn => instanceType=$instanceType"
+            machineInfo = executor.getMachineInfoByQueueAndTaskArn(queueName, taskArn)
+            log.trace "[AWS BATCH] jobId=$jobId; queue=$queueName; task=$taskArn => machineInfo=$machineInfo"
         }
-        return instanceType
+        return machineInfo
     }
 
     TraceRecord getTraceRecord() {
         def result = super.getTraceRecord()
         result.put('native_id', jobId)
-        result.machineType = getInstanceType()
+        result.machineInfo = getMachineInfo()
         return result
     }
 }

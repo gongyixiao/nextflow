@@ -17,6 +17,8 @@ import java.time.OffsetDateTime
 import java.time.ZoneId
 
 import nextflow.Session
+import nextflow.cloud.types.CloudMachineInfo
+import nextflow.cloud.types.PriceModel
 import nextflow.container.ContainerConfig
 import nextflow.exception.AbortOperationException
 import nextflow.script.ScriptBinding
@@ -177,7 +179,7 @@ class TowerClientTest extends Specification {
                 start: startTs,
                 complete: nowTs ])
         trace.executorName= 'batch'
-        trace.machineType= 'm4.large'
+        trace.machineInfo = new CloudMachineInfo('m4.large', 'eu-west-1b', PriceModel.spot)
 
         when:
         def req = observer.makeTasksReq([trace])
@@ -190,6 +192,8 @@ class TowerClientTest extends Specification {
         req.tasks[0].start == OffsetDateTime.ofInstant(Instant.ofEpochMilli(startTs), ZoneId.systemDefault())
         req.tasks[0].executor == 'batch'
         req.tasks[0].machineType == 'm4.large'
+        req.tasks[0].cloudZone == 'eu-west-1b'
+        req.tasks[0].priceModel == 'spot'
 
         when:
         observer.sendHttpMessage(URL, req)

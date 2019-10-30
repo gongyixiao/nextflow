@@ -20,13 +20,15 @@ import com.amazonaws.services.batch.AWSBatch
 import com.amazonaws.services.batch.model.DescribeComputeEnvironmentsRequest
 import com.amazonaws.services.batch.model.DescribeJobQueuesRequest
 import com.amazonaws.services.ec2.AmazonEC2
-import com.amazonaws.services.ec2.model.DescribeInstanceAttributeRequest
-import com.amazonaws.services.ec2.model.InstanceAttributeName
+import com.amazonaws.services.ec2.model.DescribeInstancesRequest
+import com.amazonaws.services.ec2.model.Instance
 import com.amazonaws.services.ecs.AmazonECS
 import com.amazonaws.services.ecs.model.DescribeContainerInstancesRequest
 import com.amazonaws.services.ecs.model.DescribeTasksRequest
 import groovy.transform.CompileStatic
 import groovy.transform.Memoized
+import nextflow.cloud.types.CloudMachineInfo
+import nextflow.cloud.types.PriceModel
 /**
  * Helper class to resolve Batch related metadata
  *
@@ -40,12 +42,12 @@ class AwsBatchHelper {
     AmazonEC2 ec2Client
 
     @Memoized(maxCacheSize = 100)
-    protected List<String> getClusterArnByBatchQueue(String queueName) {
+    private List<String> getClusterArnByBatchQueue(String queueName) {
         final envNames = getComputeEnvByQueueName(queueName)
         return getClusterArnByCompEnvNames(envNames)
     }
 
-    protected List<String> getClusterArnByCompEnvNames(List<String> envNames) {
+    private List<String> getClusterArnByCompEnvNames(List<String> envNames) {
         final req = new DescribeComputeEnvironmentsRequest().withComputeEnvironments(envNames)
         batchClient
                 .describeComputeEnvironments(req)
@@ -53,7 +55,7 @@ class AwsBatchHelper {
                 *.getEcsClusterArn()
     }
 
-    protected List<String> getComputeEnvByQueueName(String queueName) {
+    private List<String> getComputeEnvByQueueName(String queueName) {
         final req = new DescribeJobQueuesRequest().withJobQueues(queueName)
         final resp = batchClient.describeJobQueues(req)
         final result = new ArrayList(10)
@@ -65,18 +67,13 @@ class AwsBatchHelper {
         return result
     }
 
-    protected String getInstanceTypeByClusterAndTaskArn(String clusterArn, String taskArn) {
+    private CloudMachineInfo getInfoByClusterAndTaskArn(String clusterArn, String taskArn) {
         final containerId = getContainerIdByClusterAndTaskArn(clusterArn, taskArn)
         final instanceId = getInstanceIdByClusterAndContainerId(clusterArn, containerId)
-        instanceId ? getInstanceTypeByInstanceId(instanceId) : null
+        instanceId ? getInfoByInstanceId(instanceId) : null
     }
 
-    protected String getInstanceTypeByClusterAndContainerArn(String clusterArn, String containerArn) {
-        final instanceId = getInstanceIdByClusterAndContainerId(clusterArn, containerArn)
-        instanceId ? getInstanceTypeByInstanceId(instanceId) : null
-    }
-
-    protected String getContainerIdByClusterAndTaskArn(String clusterArn, String taskArn) {
+    private String getContainerIdByClusterAndTaskArn(String clusterArn, String taskArn) {
         final describeTaskReq = new DescribeTasksRequest()
                 .withCluster(clusterArn)
                 .withTasks(taskArn)
@@ -92,7 +89,7 @@ class AwsBatchHelper {
             throw new IllegalStateException("Found more than one container for taskArn=$taskArn")
     }
 
-    protected String getInstanceIdByClusterAndContainerId(String clusterArn, String containerId) {
+    private String getInstanceIdByClusterAndContainerId(String clusterArn, String containerId) {
         final describeContainerReq = new DescribeContainerInstancesRequest()
                 .withCluster(clusterArn)
                 .withContainerInstances(containerId)
@@ -109,28 +106,32 @@ class AwsBatchHelper {
     }
 
     @Memoized(maxCacheSize = 100)
-    protected String getInstanceTypeByInstanceId(String instanceId) {
+    private CloudMachineInfo getInfoByInstanceId(String instanceId) {
         assert instanceId
-        final instanceAttributeReq = new DescribeInstanceAttributeRequest()
-                .withInstanceId(instanceId)
-                .withAttribute(InstanceAttributeName.InstanceType)
-        ec2Client
-                .describeInstanceAttribute(instanceAttributeReq)
-                .getInstanceAttribute()
-                .getInstanceType()
-
+        final req = new DescribeInstancesRequest() .withInstanceIds(instanceId)
+        final res = ec2Client .describeInstances(req) .getReservations() [0]
+        final Instance instance = res ? res.getInstances() [0] : null
+        return (instance
+                ? new CloudMachineInfo(
+                    instance.getInstanceType(),
+                    instance.getPlacement().getAvailabilityZone(),
+                    getPrice(instance) )
+                : null)
     }
 
-    String getInstanceTypeByQueueAndTaskArn(String queue, String taskArn) {
+        private PriceModel getPrice(Instance instance) {
+        instance.getInstanceLifecycle()=='spot' ? PriceModel.spot : PriceModel.standard
+    }
+
+    CloudMachineInfo getCloudInfoByQueueAndTaskArn(String queue, String taskArn) {
         final clusterArnList = getClusterArnByBatchQueue(queue)
         for( String cluster : clusterArnList ) {
-            final instanceType = getInstanceTypeByClusterAndTaskArn(cluster, taskArn)
-            if( instanceType )
-                return instanceType
+            final result = getInfoByClusterAndTaskArn(cluster, taskArn)
+            if( result )
+                return result
         }
         return null
     }
-
 
 }
 
