@@ -435,7 +435,9 @@ class TowerClient implements TraceObserver {
 
         // add transient fields
         record.executor = trace.getExecutorName()
-        record.machineType = trace.getMachineType()
+        record.cloudZone = trace.getMachineInfo()?.zone
+        record.machineType = trace.getMachineInfo()?.type
+        record.priceModel = trace.getMachineInfo()?.priceModel?.toString()
 
         return record
     }

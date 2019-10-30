@@ -26,6 +26,7 @@ import groovy.transform.CompileStatic
 import groovy.transform.PackageScope
 import groovy.util.logging.Slf4j
 import nextflow.cloud.aws.AmazonCloudDriver
+import nextflow.cloud.types.CloudMachineInfo
 import nextflow.exception.AbortOperationException
 import nextflow.executor.Executor
 import nextflow.extension.FilesEx
@@ -233,9 +234,9 @@ class AwsBatchExecutor extends Executor {
     ThrottlingExecutor getReaper() { reaper }
 
 
-    String getInstanceTypeByQueueAndTaskArn(String queue, String taskArn) {
+    CloudMachineInfo getMachineInfoByQueueAndTaskArn(String queue, String taskArn) {
         try {
-            return helper?.getInstanceTypeByQueueAndTaskArn(queue, taskArn)
+            return helper?.getCloudInfoByQueueAndTaskArn(queue, taskArn)
         }
         catch( Exception e ) {
             log.warn "Unable to retrieve AWS instance type for queue=$queue; task=$taskArn | ${e.message}", e

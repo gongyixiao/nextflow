@@ -24,6 +24,7 @@ import groovy.transform.CompileStatic
 import groovy.transform.Memoized
 import groovy.transform.PackageScope
 import groovy.util.logging.Slf4j
+import nextflow.cloud.types.CloudMachineInfo
 import nextflow.extension.Bolts
 import nextflow.processor.TaskId
 import nextflow.script.ProcessDef
@@ -113,8 +114,8 @@ class TraceRecord implements Serializable {
     @PackageScope
     static TimeZone TIMEZONE = null
 
-    transient private String machineType
     transient private String executorName
+    transient private CloudMachineInfo machineInfo
 
     /**
      * Convert the given value to a string
@@ -589,12 +590,12 @@ class TraceRecord implements Serializable {
         this.executorName = value
     }
 
-    String getMachineType() {
-        return machineType
+    CloudMachineInfo getMachineInfo() {
+        return machineInfo
     }
 
-    void setMachineType(String value) {
-        this.machineType = value
+    void setMachineInfo(CloudMachineInfo value) {
+        this.machineInfo = value
     }
 
 }
