@@ -81,6 +81,12 @@ class AwsBatchTaskHandler extends TaskHandler implements BatchHandler<String,Job
 
     private volatile String jobId
 
+    private volatile String taskArn
+
+    private String queueName
+
+    private String instanceType
+
     private Map<String,String> environment
 
     final static private Map<String,String> jobDefinitions = [:]
@@ -199,6 +205,9 @@ class AwsBatchTaskHandler extends TaskHandler implements BatchHandler<String,Job
         final result = job?.status in ['RUNNING', 'SUCCEEDED', 'FAILED']
         if( result )
             this.status = TaskStatus.RUNNING
+        // fetch the task arn
+        if( !taskArn )
+            taskArn = job.getContainer().getTaskArn()
         return result
     }
 
@@ -277,6 +286,7 @@ class AwsBatchTaskHandler extends TaskHandler implements BatchHandler<String,Job
         final resp = bypassProxy(client).submitJob(req)
         this.jobId = resp.jobId
         this.status = TaskStatus.SUBMITTED
+        this.queueName = req.getJobQueue()
         log.debug "[AWS BATCH] submitted > job=$jobId; work-dir=${task.getWorkDirStr()}"
     }
 
@@ -586,9 +596,21 @@ class AwsBatchTaskHandler extends TaskHandler implements BatchHandler<String,Job
         result.size()>128 ? result.substring(0,128) : result
     }
 
+
+    protected String getInstanceType() {
+        if( instanceType )
+            return instanceType
+        if( queueName && taskArn ) {
+            instanceType = executor.getInstanceTypeByQueueAndTaskArn(queueName, taskArn)
+            log.debug "[AWS BATCH] jobId=$jobId; queue=$queueName; task=$taskArn => instanceType=$instanceType"
+        }
+        return instanceType
+    }
+
     TraceRecord getTraceRecord() {
         def result = super.getTraceRecord()
         result.put('native_id', jobId)
+        result.machineType = getInstanceType()
         return result
     }
 }

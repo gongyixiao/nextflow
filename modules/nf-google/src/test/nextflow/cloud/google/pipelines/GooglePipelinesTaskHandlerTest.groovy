@@ -15,6 +15,10 @@
  */
 package nextflow.cloud.google.pipelines
 
+import nextflow.executor.Executor
+import nextflow.processor.TaskProcessor
+import nextflow.script.BaseScript
+import nextflow.script.ProcessConfig
 import spock.lang.Shared
 
 import java.nio.file.Paths
@@ -352,6 +356,30 @@ class GooglePipelinesTaskHandlerTest extends GoogleSpecification {
         then:
         events == [e2, e3]
 
+    }
+
+    def 'should create trace record'() {
+        given:
+        def exec = Mock(Executor) { getName() >> 'google-pipelines' }
+        def processor = Mock(TaskProcessor)
+        processor.getExecutor() >> exec
+        processor.getName() >> 'foo'
+        processor.getConfig() >> new ProcessConfig(Mock(BaseScript))
+        def task = Mock(TaskRun)
+        task.getProcessor() >> processor
+        task.getConfig() >> Mock(TaskConfig)
+        and:
+        def handler = Spy(GooglePipelinesTaskHandler)
+        handler.task = task
+        handler.pipelineId = 'xyz-123'
+        handler.machineType = 'm1.large'
+
+        when:
+        def record = handler.getTraceRecord()
+        then:
+        record.get('native_id') == 'xyz-123'
+        record.getMachineType() == 'm1.large'
+        record.getExecutorName() == 'google-pipelines'
     }
 
 }

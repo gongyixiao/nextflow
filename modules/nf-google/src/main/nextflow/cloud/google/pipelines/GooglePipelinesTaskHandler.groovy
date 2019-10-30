@@ -352,6 +352,7 @@ class GooglePipelinesTaskHandler extends TaskHandler {
     TraceRecord getTraceRecord() {
         def result = super.getTraceRecord()
         result.put('native_id', pipelineId)
+        result.machineType = machineType
         return result
     }
 
