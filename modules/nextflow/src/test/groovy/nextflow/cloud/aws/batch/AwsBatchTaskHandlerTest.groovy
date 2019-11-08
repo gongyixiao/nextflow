@@ -34,11 +34,15 @@ import com.amazonaws.services.batch.model.SubmitJobRequest
 import com.amazonaws.services.batch.model.SubmitJobResult
 import com.amazonaws.services.batch.model.TerminateJobRequest
 import nextflow.exception.ProcessUnrecoverableException
+import nextflow.executor.Executor
 import nextflow.processor.BatchContext
 import nextflow.processor.TaskBean
 import nextflow.processor.TaskConfig
+import nextflow.processor.TaskProcessor
 import nextflow.processor.TaskRun
 import nextflow.processor.TaskStatus
+import nextflow.script.BaseScript
+import nextflow.script.ProcessConfig
 import spock.lang.Specification
 /**
  *
@@ -639,6 +643,35 @@ class AwsBatchTaskHandlerTest extends Specification {
         handler.kill()
         then:
         1 * handler.terminateJob(req) >> null
+
+    }
+
+    def 'should create the trace record' () {
+        given:
+        def exec = Mock(Executor) { getName() >> 'awsbatch' }
+        def processor = Mock(TaskProcessor)
+        processor.getExecutor() >> exec
+        processor.getName() >> 'foo'
+        processor.getConfig() >> new ProcessConfig(Mock(BaseScript))
+        def task = Mock(TaskRun)
+        task.getProcessor() >> processor
+        task.getConfig() >> Mock(TaskConfig)
+        def proxy = Mock(AwsBatchProxy)
+        def handler = Spy(AwsBatchTaskHandler)
+        handler.@client = proxy
+        handler.task = task
+        handler.@jobId = 'xyz-123'
+
+        when:
+        def trace = handler.getTraceRecord()
+        then:
+        1 * handler.isCompleted() >> false
+        1 * handler.getInstanceType() >> 'x1.large'
+        
+        and:
+        trace.native_id == 'xyz-123'
+        trace.executorName == 'awsbatch'
+        trace.machineType == 'x1.large'
 
     }
 

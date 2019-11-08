@@ -52,6 +52,9 @@ class AwsBatchExecutor extends Executor {
     @PackageScope
     private AwsBatchProxy client
 
+    /** Helper class to resolve Batch related metadata */
+    private AwsBatchHelper helper
+
     /**
      * executor service to throttle service requests
      */
@@ -122,9 +125,22 @@ class AwsBatchExecutor extends Executor {
          * create a proxy for the aws batch client that manages the request throttling 
          */
         client = new AwsBatchProxy(driver.getBatchClient(), submitter)
-
+        helper = createHelper(client, driver)
         // create the options object
         awsOptions = new AwsOptions(this)
+    }
+
+    private AwsBatchHelper createHelper(AWSBatch batchClient, AmazonCloudDriver driver) {
+        try {
+            return new AwsBatchHelper(
+                    batchClient: batchClient,
+                    ec2Client: driver.getEc2Client(),
+                    ecsClient: driver.getEcsClient() )
+        }
+        catch (Exception e) {
+            log.warn "Unable to create AWS Batch helper class | ${e.message}", e
+            return null
+        }
     }
 
     @PackageScope
@@ -215,6 +231,17 @@ class AwsBatchExecutor extends Executor {
 
     @PackageScope
     ThrottlingExecutor getReaper() { reaper }
+
+
+    String getInstanceTypeByQueueAndTaskArn(String queue, String taskArn) {
+        try {
+            return helper?.getInstanceTypeByQueueAndTaskArn(queue, taskArn)
+        }
+        catch( Exception e ) {
+            log.warn "Unable to retrieve AWS instance type for queue=$queue; task=$taskArn | ${e.message}", e
+            return null
+        }
+    }
 
 }
 

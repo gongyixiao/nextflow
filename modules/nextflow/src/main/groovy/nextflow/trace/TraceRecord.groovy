@@ -30,7 +30,6 @@ import nextflow.script.ProcessDef
 import nextflow.util.Duration
 import nextflow.util.KryoHelper
 import nextflow.util.MemoryUnit
-import static nextflow.util.SecretHelper.secureEnvString 
 /**
   * This object represent holds the information of a single process run,
   * its content is saved to a trace file line
@@ -48,7 +47,8 @@ class TraceRecord implements Serializable {
         this.store = new LinkedHashMap<>(FIELDS.size())
     }
 
-    private TraceRecord(Map store) {
+    @PackageScope
+    TraceRecord(Map store) {
         this.store = store
     }
 
@@ -113,6 +113,8 @@ class TraceRecord implements Serializable {
     @PackageScope
     static TimeZone TIMEZONE = null
 
+    transient private String machineType
+    transient private String executorName
 
     /**
      * Convert the given value to a string
@@ -577,6 +579,22 @@ class TraceRecord implements Serializable {
 
     boolean isCached() {
         store.status == 'CACHED'
+    }
+
+    String getExecutorName() {
+        return executorName
+    }
+
+    void setExecutorName(String value ) {
+        this.executorName = value
+    }
+
+    String getMachineType() {
+        return machineType
+    }
+
+    void setMachineType(String value) {
+        this.machineType = value
     }
 
 }
