@@ -1342,30 +1342,5 @@ class ParamsOutTest extends Specification {
 
     }
 
-    def 'should define env outputs' () {
-        setup:
-        def text = '''
-            process hola {
-              output:
-              env FOO into x 
-              env BAR into y 
-              
-              /echo command/ 
-            }
-            '''
 
-        def binding = [:]
-        def process = parseAndReturnProcess(text, binding)
-
-        when:
-        def outs = process.config.getOutputs() as List<EnvOutParam>
-
-        then:
-        outs.size() == 2
-        and:
-        outs[0].name == 'FOO'
-        and:
-        outs[1].name == 'BAR'
-
-    }
 }
