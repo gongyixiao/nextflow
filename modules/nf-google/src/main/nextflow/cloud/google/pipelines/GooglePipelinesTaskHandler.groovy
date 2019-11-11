@@ -320,7 +320,7 @@ class GooglePipelinesTaskHandler extends TaskHandler {
 
         //Create the mount for out work files.
         sharedMount = executor.helper.configureMount(diskName, mountPath)
-        zone = task.con
+
         def req = new GooglePipelinesSubmitRequest()
         req.machineType = machineType
         req.project = pipelineConfiguration.project
