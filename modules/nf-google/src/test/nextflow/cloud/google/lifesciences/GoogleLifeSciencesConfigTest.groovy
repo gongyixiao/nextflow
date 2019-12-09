@@ -15,6 +15,7 @@
  */
 package nextflow.cloud.google.lifesciences
 
+import nextflow.exception.AbortOperationException
 import spock.lang.Specification
 
 class GoogleLifeSciencesConfigTest extends Specification {
@@ -126,5 +127,31 @@ class GoogleLifeSciencesConfigTest extends Specification {
         config.location == 'us-east4'
     }
 
+    def 'should report missing project' () {
+        when:
+        GoogleLifeSciencesConfig.fromSession0([:])
+        then:
+        def err =thrown(AbortOperationException)
+        and:
+        err.message.startsWith('Missing Google project Id')
+    }
+
+    def 'should report missing region' () {
+        when:
+        GoogleLifeSciencesConfig.fromSession0([google:[project:'foo']])
+        then:
+        def err =thrown(AbortOperationException)
+        and:
+        err.message.startsWith('Missing configuration value \'google.zone\' or \'google.region\'')
+    }
+
+    def 'should report no double' () {
+        when:
+        GoogleLifeSciencesConfig.fromSession0([google:[project:'foo', region:'x', zone:'y']])
+        then:
+        def err =thrown(AbortOperationException)
+        and:
+        err.message.startsWith('You can\'t specify both \'google.zone\' and \'google.region\' configuration parameters')
+    }
 
 }

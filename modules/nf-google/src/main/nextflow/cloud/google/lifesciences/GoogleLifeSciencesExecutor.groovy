@@ -64,27 +64,7 @@ class GoogleLifeSciencesExecutor extends Executor {
     @Override
     protected void register() {
         super.register()
-        initialize0()
-        log.debug "[GLS] Google LifeSciences Configuration: '$config'"
-    }
 
-    @Override
-    protected TaskMonitor createTaskMonitor() {
-        TaskPollingMonitor.create(session, name, 1000, Duration.of('10 sec'))
-    }
-
-    @Override
-    TaskHandler createTaskHandler(TaskRun task) {
-        return new GoogleLifeSciencesTaskHandler(task, this)
-    }
-
-    protected GoogleLifeSciencesHelper getHelper() { return helper }
-
-    protected GoogleLifeSciencesConfig getConfig() { return config }
-
-    private void initialize0() {
-
-        //Make sure that the workdir is a GS Bucket
         if ( getWorkDir()?.scheme != 'gs' ) {
             session.abort()
             throw new AbortOperationException("Executor `google-lifesciences` requires a Google Storage bucket to be specified as a working directory -- Add the option `-w gs://<your-bucket/path>` to your run command line or specify a workDir in your config file")
@@ -102,8 +82,27 @@ class GoogleLifeSciencesExecutor extends Executor {
         }
 
         log.debug "Google Life Science config=$config"
-        helper = new GoogleLifeSciencesHelper().init()
+        helper = initClient()
     }
+
+    protected GoogleLifeSciencesHelper initClient() {
+        new GoogleLifeSciencesHelper().init()
+    }
+
+    @Override
+    protected TaskMonitor createTaskMonitor() {
+        TaskPollingMonitor.create(session, name, 1000, Duration.of('10 sec'))
+    }
+
+    @Override
+    TaskHandler createTaskHandler(TaskRun task) {
+        return new GoogleLifeSciencesTaskHandler(task, this)
+    }
+
+    protected GoogleLifeSciencesHelper getHelper() { return helper }
+
+    protected GoogleLifeSciencesConfig getConfig() { return config }
+
 
 
 }
