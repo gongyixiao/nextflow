@@ -54,8 +54,6 @@ class GoogleLifeSciencesTaskHandler extends TaskHandler {
 
     GoogleLifeSciencesExecutor executor
 
-    GoogleLifeSciencesConfiguration pipelineConfiguration
-
     private TaskBean taskBean
 
     private Path exitFile
@@ -72,12 +70,11 @@ class GoogleLifeSciencesTaskHandler extends TaskHandler {
 
     private GoogleLifeSciencesHelper helper
 
-    GoogleLifeSciencesTaskHandler(TaskRun task, GoogleLifeSciencesExecutor executor, GoogleLifeSciencesConfiguration pipelineConfiguration) {
+    GoogleLifeSciencesTaskHandler(TaskRun task, GoogleLifeSciencesExecutor executor) {
         super(task)
 
         this.executor = executor
         this.taskBean = new TaskBean(task)
-        this.pipelineConfiguration = pipelineConfiguration
         this.helper = executor.helper
 
         this.outputFile = task.workDir.resolve(TaskRun.CMD_OUTFILE)
@@ -285,19 +282,19 @@ class GoogleLifeSciencesTaskHandler extends TaskHandler {
         //Create the mount for out work files.
         def req = new GoogleLifeSciencesSubmitRequest()
         req.machineType = getMachineType()
-        req.project = pipelineConfiguration.project
-        req.zone = pipelineConfiguration.zone
-        req.region = pipelineConfiguration.region
+        req.project = executor.config.project
+        req.zone = executor.config.zones
+        req.region = executor.config.regions
         req.diskName = DEFAULT_DISK_NAME
         req.diskSizeGb = task.config.getDisk()?.getGiga() as Integer
-        req.preemptible = pipelineConfiguration.preemptible
+        req.preemptible = executor.config.preemptible
         req.taskName = "nf-$task.hash"
         req.containerImage = task.container
         req.fileCopyImage = DEFAULT_COPY_IMAGE
         req.workDir = task.workDir
         req.sharedMount = configureMount(DEFAULT_DISK_NAME, task.workDir.toString())
         req.accelerator = task.config.getAccelerator()
-        req.location = pipelineConfiguration.location
+        req.location = executor.config.location
         return req
     }
 
@@ -314,8 +311,8 @@ class GoogleLifeSciencesTaskHandler extends TaskHandler {
 
     private CloudMachineInfo getMachineInfo() {
         // TODO the actual zone should be taken from the VM instance
-        final zone = pipelineConfiguration.zone?.get(0)
-        final price = pipelineConfiguration.preemptible ? PriceModel.spot : PriceModel.standard
+        final zone = executor.config.location
+        final price = executor.config.preemptible ? PriceModel.spot : PriceModel.standard
         new CloudMachineInfo(machineType, zone, price)
     }
 

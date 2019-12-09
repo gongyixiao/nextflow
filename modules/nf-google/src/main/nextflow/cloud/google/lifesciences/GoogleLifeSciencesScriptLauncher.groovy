@@ -33,11 +33,8 @@ import nextflow.processor.TaskRun
 @CompileStatic
 class GoogleLifeSciencesScriptLauncher extends BashWrapperBuilder {
 
-    private GoogleLifeSciencesConfiguration pipelineConfiguration
-
     GoogleLifeSciencesScriptLauncher(TaskBean bean, GoogleLifeSciencesTaskHandler handler) {
         super(bean, new GoogleLifeSciencesFileCopyStrategy(bean, handler))
-        this.pipelineConfiguration = handler.pipelineConfiguration
         // enable the copying of output file to the GS work dir
         scratch = bean.workDir.toString()
         // include task script as an input to force its staging in the container work directory

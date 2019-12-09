@@ -19,12 +19,12 @@ import java.nio.file.Path
 
 import com.google.cloud.storage.contrib.nio.CloudStorageFileSystem
 import nextflow.Session
+import nextflow.cloud.google.GoogleSpecification
 import nextflow.exception.AbortOperationException
 import spock.lang.Ignore
 import spock.lang.Shared
-import spock.lang.Specification
 
-class GoogleLifeSciencesExecutorTest extends Specification {
+class GoogleLifeSciencesExecutorTest extends GoogleSpecification {
 
     @Shared
     def validZoneConfig = [
@@ -54,15 +54,16 @@ class GoogleLifeSciencesExecutorTest extends Specification {
 
         then:
         def error = thrown(AbortOperationException)
-        error.getMessage().contains("GCE bucket must be provided as a working directory")
+        error.getMessage().startsWith("When using `google-lifesciences` executor a Google Storage bucket must be specified as a working directory")
     }
 
     def 'should abort operation when project is not specified'() {
         given:
         def session = Stub(Session)
-        def path = CloudStorageFileSystem.forBucket("test").getPath("/")
+        def path = mockGsPath('gs://work/dir')
         session.workDir >> path
         session.bucketDir >> null
+        session.binDir >> null
         session.config >> [
                 "google" : [
                         "zone" : "testZone"
@@ -76,15 +77,16 @@ class GoogleLifeSciencesExecutorTest extends Specification {
 
         then:
         def error = thrown(AbortOperationException)
-        error.getMessage() == "Required config value 'google.project' for executor null is not defined -- Please add it to your process or nextflow configuration file"
+        error.getMessage().startsWith("Missing Google project Id")
     }
 
     def 'should abort operation when neither zone or region are specified'() {
         given:
         def session = Stub(Session)
-        def path = CloudStorageFileSystem.forBucket("test").getPath("/")
+        def path = mockGsPath('gs://work/dir')
         session.workDir >> path
         session.bucketDir >> null
+        session.binDir >> null
         session.config >> [
                 "google" : [
                         "project" : "testproject"
@@ -105,8 +107,10 @@ class GoogleLifeSciencesExecutorTest extends Specification {
     def 'should abort operation when both zone and region are specified'() {
         given:
         def session = Stub(Session)
-        def path = CloudStorageFileSystem.forBucket("test").getPath("/")
-        session.bucketDir >> path
+        def path = mockGsPath('gs://work/dir')
+        session.workDir >> path
+        session.bucketDir >> null
+        session.binDir >> null
         session.config >> [
                 "google" : [
                         "project" : "testproject",
@@ -156,10 +160,11 @@ class GoogleLifeSciencesExecutorTest extends Specification {
 
     def 'should register successfully with zone'()  {
         given:
-        def session = Stub(Session)
+        def session = Mock(Session)
         def helper = Mock(GoogleLifeSciencesHelper)
-        def path = CloudStorageFileSystem.forBucket("test").getPath("/")
+        def path = mockGsPath('gs://foo/work/dir')
         session.bucketDir >> path
+        session.binDir >> null
         session.config >> validZoneConfig
         def executor = new GoogleLifeSciencesExecutor(helper: helper)
         executor.session = session
@@ -168,17 +173,18 @@ class GoogleLifeSciencesExecutorTest extends Specification {
         executor.register()
 
         then:
-        executor.pipelineConfig.project == validZoneConfig.google?.project
-        executor.pipelineConfig.zone == validZoneConfig.google?.zone?.split(",")?.toList()
+        executor.config.project == validZoneConfig.google?.project
+        executor.config.zones == validZoneConfig.google?.zone?.split(",")?.toList()
     }
 
     def 'should register successfully with region'()  {
         given:
-        def session = Stub(Session)
+        def session = Mock(Session)
         def helper = Mock(GoogleLifeSciencesHelper)
-        def path = CloudStorageFileSystem.forBucket("test").getPath("/")
+        def path = mockGsPath('gs://foo/bar')
         session.bucketDir >> path
         session.config >> validRegionConfig
+        session.binDir >> null
         def executor = new GoogleLifeSciencesExecutor(helper: helper)
         executor.session = session
 
@@ -186,8 +192,8 @@ class GoogleLifeSciencesExecutorTest extends Specification {
         executor.register()
 
         then:
-        executor.pipelineConfig.project == validRegionConfig.google?.project
-        executor.pipelineConfig.region == validRegionConfig.google?.region?.split(",")?.toList()
+        executor.config.project == validRegionConfig.google?.project
+        executor.config.regions == validRegionConfig.google?.region?.split(",")?.toList()
     }
 
     def 'should be containerNative'() {

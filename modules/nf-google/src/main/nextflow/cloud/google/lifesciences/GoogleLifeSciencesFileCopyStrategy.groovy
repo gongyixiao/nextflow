@@ -35,12 +35,14 @@ import nextflow.util.Escape
 @CompileStatic
 class GoogleLifeSciencesFileCopyStrategy extends SimpleFileCopyStrategy implements GoogleLifeSciencesTaskDirWrangler {
 
+    GoogleLifeSciencesConfig config
     GoogleLifeSciencesTaskHandler handler
     TaskBean task
 
     GoogleLifeSciencesFileCopyStrategy(TaskBean bean, GoogleLifeSciencesTaskHandler handler) {
         super(bean)
         this.handler = handler
+        this.config = handler.executor.config
         this.task = bean
     }
 
@@ -87,10 +89,10 @@ class GoogleLifeSciencesFileCopyStrategy extends SimpleFileCopyStrategy implemen
             result.append(stagingCommands.join('\n')) .append('\n')
 
         // copy the remoteBinDir if it is defined
-        if(handler.pipelineConfiguration.remoteBinDir) {
+        if(config.remoteBinDir) {
             result
                     .append("mkdir -p $localTaskDir/nextflow-bin").append('\n')
-                    .append("gsutil -m -q cp -P -r ${Escape.uriPath(handler.pipelineConfiguration.remoteBinDir)}/* $localTaskDir/nextflow-bin").append('\n')
+                    .append("gsutil -m -q cp -P -r ${Escape.uriPath(config.remoteBinDir)}/* $localTaskDir/nextflow-bin").append('\n')
         }
 
         result.toString()
@@ -135,7 +137,7 @@ class GoogleLifeSciencesFileCopyStrategy extends SimpleFileCopyStrategy implemen
         if( copy.containsKey('PATH') )
             copy.remove('PATH')
         // when a remote bin directory is provide managed it properly
-        if( handler.pipelineConfiguration.remoteBinDir ) {
+        if( config.remoteBinDir ) {
             result << "chmod +x $localTaskDir/nextflow-bin/*\n"
             result << "export PATH=$localTaskDir/nextflow-bin:\$PATH\n"
         }

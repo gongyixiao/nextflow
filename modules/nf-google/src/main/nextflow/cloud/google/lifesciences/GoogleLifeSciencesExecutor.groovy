@@ -19,9 +19,7 @@ package nextflow.cloud.google.lifesciences
 
 import java.nio.file.Path
 
-import com.google.cloud.storage.contrib.nio.CloudStoragePath
 import groovy.transform.CompileStatic
-import groovy.transform.PackageScope
 import groovy.util.logging.Slf4j
 import nextflow.exception.AbortOperationException
 import nextflow.executor.Executor
@@ -34,7 +32,6 @@ import nextflow.processor.TaskRun
 import nextflow.script.ScriptType
 import nextflow.util.Duration
 import nextflow.util.ServiceName
-
 /**
  * Google Pipelines Executor.
  *
@@ -48,7 +45,7 @@ import nextflow.util.ServiceName
 @SupportedScriptTypes(ScriptType.SCRIPTLET)
 class GoogleLifeSciencesExecutor extends Executor {
 
-    private GoogleLifeSciencesConfiguration pipelineConfig
+    private GoogleLifeSciencesConfig config
 
     private GoogleLifeSciencesHelper helper
 
@@ -68,7 +65,7 @@ class GoogleLifeSciencesExecutor extends Executor {
     protected void register() {
         super.register()
         initialize0()
-        log.debug "[GLS] Pipelines Configuration: '$pipelineConfig'"
+        log.debug "[GLS] Google LifeSciences Configuration: '$config'"
     }
 
     @Override
@@ -78,71 +75,35 @@ class GoogleLifeSciencesExecutor extends Executor {
 
     @Override
     TaskHandler createTaskHandler(TaskRun task) {
-        return new GoogleLifeSciencesTaskHandler(task, this, pipelineConfig)
+        return new GoogleLifeSciencesTaskHandler(task, this)
     }
 
-    @PackageScope
-    GoogleLifeSciencesHelper getHelper() { return helper }
+    protected GoogleLifeSciencesHelper getHelper() { return helper }
+
+    protected GoogleLifeSciencesConfig getConfig() { return config }
 
     private void initialize0() {
 
         //Make sure that the workdir is a GS Bucket
-        if (!(getWorkDir() instanceof CloudStoragePath)) {
+        if ( getWorkDir()?.scheme != 'gs' ) {
             session.abort()
-            throw new AbortOperationException("When using `$name` executor a GCE bucket must be provided as a working directory -- Add the option `-w gs://<your-bucket/path>` to your run command line or specify a workDir in your config file")
+            throw new AbortOperationException("When using `google-lifesciences` executor a Google Storage bucket must be specified as a working directory -- Add the option `-w gs://<your-bucket/path>` to your run command line or specify a workDir in your config file")
         }
-
-        //Check for the existence of all required configuration for our executor
-        def requiredConfigs = ["google.project"]
-
-        for( String it : requiredConfigs ) {
-            if (!session.config.navigate(it)) {
-                session.abort()
-                throw new AbortOperationException("Required config value '$it' for executor $name is not defined -- Please add it to your process or nextflow configuration file")
-            }
-        }
-
-        //check if we have one of the mutual exclusive zone or region specified
-        if(!session.config.navigate("google.zone") && !session.config.navigate("google.region")){
-            session.abort()
-            throw new AbortOperationException("Missing configuration value 'google.zone' or 'google.region'")
-        }
-
-        //check if we have one of the mutual exclusive zone or region specified
-        if(session.config.navigate("google.zone") && session.config.navigate("google.region")){
-            session.abort()
-            throw new AbortOperationException("You can't specify both 'google.zone' and 'google.region' configuration parameters -- Please remove one of them from your configuration")
-        }
-
-        def path = session.config.navigate('env.PATH')
-        if( path ) {
-            log.warn "Environment PATH defined in config file is ignored by Google Pipeline executor"
-        }
-
-        /*
-         * upload local binaries
-         */
-        def disableBinDir = session.getExecConfigProp(name, 'disableRemoteBinDir', false)
-        Path remoteBinDir = null
-        if( session.binDir && !disableBinDir ) {
-            def cloudPath = getTempDir()
-            log.info "Uploading local `bin` scripts folder to ${cloudPath.toUriString()}/bin"
-            remoteBinDir = FilesEx.copyTo(session.binDir, cloudPath)
-        }
-
-        def zones = (session.config.navigate("google.zone") as String)?.split(",")?.toList()
-        def regions = (session.config.navigate("google.region") as String)?.split(",")?.toList()
 
         if( !env.get('GOOGLE_APPLICATION_CREDENTIALS') )
             throw new AbortOperationException('Missing Google credentials -- make sure your environment defines the GOOGLE_APPLICATION_CREDENTIALS environment variable')
 
-        pipelineConfig = new GoogleLifeSciencesConfiguration(
-                session.config.navigate("google.project") as String,
-                zones,
-                regions,
-                remoteBinDir,
-                session.config.navigate("cloud.preemptible") as boolean )
+        config = GoogleLifeSciencesConfig.fromSession(session)
 
+        if( session.binDir && !config.disableBinDir ) {
+            final cloudPath = getTempDir()
+            log.info "Uploading local `bin` scripts folder to ${cloudPath.toUriString()}/bin"
+            config.remoteBinDir = FilesEx.copyTo(session.binDir, cloudPath)
+        }
+
+        log.debug "Google Life Science config=$config"
         helper = new GoogleLifeSciencesHelper().init()
     }
+
+
 }

@@ -31,7 +31,9 @@ class GoogleLifeSciencesFileCopyStrategyTest extends GoogleSpecification {
             getWorkDir() >> mockGsPath('gs://my-bucket/work/xx/yy')
         }
         def handler = Mock(GoogleLifeSciencesTaskHandler) {
-            getPipelineConfiguration() >> Mock(GoogleLifeSciencesConfiguration)
+            getExecutor() >> Mock(GoogleLifeSciencesExecutor) {
+                getConfig() >> Mock(GoogleLifeSciencesConfig)
+            }
         }
         and:
         def strategy = new GoogleLifeSciencesFileCopyStrategy(bean, handler)
@@ -105,7 +107,9 @@ class GoogleLifeSciencesFileCopyStrategyTest extends GoogleSpecification {
             getWorkDir() >> mockGsPath('gs://my-bucket/work/xx/yy')
         }
         def handler = Mock(GoogleLifeSciencesTaskHandler) {
-            getPipelineConfiguration() >> Mock(GoogleLifeSciencesConfiguration)
+            getExecutor() >> Mock(GoogleLifeSciencesExecutor) {
+                getConfig() >> Mock(GoogleLifeSciencesConfig)
+            }
         }
         and:
         def strategy = new GoogleLifeSciencesFileCopyStrategy(bean, handler)
@@ -135,7 +139,9 @@ class GoogleLifeSciencesFileCopyStrategyTest extends GoogleSpecification {
             getWorkDir() >> mockGsPath('gs://my-bucket/work/xx/yy')
         }
         def handler = Mock(GoogleLifeSciencesTaskHandler) {
-            getPipelineConfiguration() >> Mock(GoogleLifeSciencesConfiguration)
+            getExecutor() >> Mock(GoogleLifeSciencesExecutor) {
+                getConfig() >> Mock(GoogleLifeSciencesConfig)
+            }
         }
         and:
         def strategy = new GoogleLifeSciencesFileCopyStrategy(bean, handler)
@@ -155,11 +161,12 @@ class GoogleLifeSciencesFileCopyStrategyTest extends GoogleSpecification {
         def bean = Mock(TaskBean) {
             getWorkDir() >> mockGsPath('gs://my-bucket/work/xx/yy')
         }
-        def config = Mock(GoogleLifeSciencesConfiguration) {
-            getRemoteBinDir() >> mockGsPath('gs://my-bucket/bin/d i r')
-        }
         def handler = Mock(GoogleLifeSciencesTaskHandler) {
-            getPipelineConfiguration() >> config
+            getExecutor() >> Mock(GoogleLifeSciencesExecutor) {
+                getConfig() >> Mock(GoogleLifeSciencesConfig) {
+                    getRemoteBinDir() >> mockGsPath('gs://my-bucket/bin/d i r')
+                }
+            }
         }
         and:
         def strategy = new GoogleLifeSciencesFileCopyStrategy(bean, handler)

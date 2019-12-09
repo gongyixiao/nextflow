@@ -27,7 +27,7 @@ import nextflow.util.Escape
  * @author Paolo Di Tommaso <paolo.ditommaso@gmail.com>
  */
 @CompileStatic
-trait LifeSciencesTaskDirWrangler {
+trait GoogleLifeSciencesTaskDirWrangler {
 
     abstract Path getWorkDir()
 

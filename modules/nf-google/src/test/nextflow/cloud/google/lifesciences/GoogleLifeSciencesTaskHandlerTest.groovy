@@ -24,7 +24,6 @@ import nextflow.Session
 import nextflow.cloud.google.GoogleSpecification
 import nextflow.cloud.types.PriceModel
 import nextflow.exception.ProcessUnrecoverableException
-import nextflow.executor.Executor
 import nextflow.processor.TaskConfig
 import nextflow.processor.TaskId
 import nextflow.processor.TaskProcessor
@@ -38,7 +37,10 @@ import spock.lang.Shared
 class GoogleLifeSciencesTaskHandlerTest extends GoogleSpecification {
 
     @Shared
-    GoogleLifeSciencesConfiguration pipeConfig = new GoogleLifeSciencesConfiguration("testProject",["testZone"],["testRegion"])
+    GoogleLifeSciencesConfig pipeConfig = new GoogleLifeSciencesConfig(
+            project: "testProject",
+            zones: ["testZone"],
+            regions: ["testRegion"])
 
     @Shared
     UUID uuid = new UUID(4,4)
@@ -70,7 +72,7 @@ class GoogleLifeSciencesTaskHandlerTest extends GoogleSpecification {
         }
 
         when: 'handler is constructed'
-        def handler = new GoogleLifeSciencesTaskHandler(noContainerTaskRunner,stubExecutor,pipeConfig)
+        def handler = new GoogleLifeSciencesTaskHandler(noContainerTaskRunner,stubExecutor)
 
         then: 'we should get an error stating that container definition is missing'
         def error = thrown(ProcessUnrecoverableException)
@@ -81,7 +83,7 @@ class GoogleLifeSciencesTaskHandlerTest extends GoogleSpecification {
 
     def 'should construct correctly'() {
         when:
-        def handler = new GoogleLifeSciencesTaskHandler(stubTaskRunner, stubExecutor,pipeConfig)
+        def handler = new GoogleLifeSciencesTaskHandler(stubTaskRunner, stubExecutor)
 
         then:
         handler.task.container == "testContainer"
@@ -133,12 +135,20 @@ class GoogleLifeSciencesTaskHandlerTest extends GoogleSpecification {
 
     def 'should create pipeline request' () {
         given:
-
-        def helper = Mock(GoogleLifeSciencesHelper)
-        def executor = new GoogleLifeSciencesExecutor(helper: helper)
-        def config = Mock(GoogleLifeSciencesConfiguration)
         def workDir = mockGsPath('gs://my-bucket/work/dir')
-
+        and:
+        def executor = Mock(GoogleLifeSciencesExecutor) {
+            getHelper() >> Mock(GoogleLifeSciencesHelper)
+            getConfig() >> {
+                Mock(GoogleLifeSciencesConfig) {
+                    getProject() >> 'my-project'
+                    getZones() >> ['my-zone']
+                    getRegions() >> ['my-region']
+                    getPreemptible() >> true
+                }
+            }
+        }
+        and:
         def task = Mock(TaskRun)
         task.getName() >> 'foo'
         task.getWorkDir() >> workDir
@@ -147,7 +157,6 @@ class GoogleLifeSciencesTaskHandlerTest extends GoogleSpecification {
         task.getConfig() >> new TaskConfig(disk: '250 GB', machineType: 'n1-1234')
 
         def handler = new GoogleLifeSciencesTaskHandler(
-                pipelineConfiguration: config,
                 executor: executor,
                 task: task )
 
@@ -155,12 +164,6 @@ class GoogleLifeSciencesTaskHandlerTest extends GoogleSpecification {
         def req = handler.createPipelineRequest()
 
         then:
-        config.getProject() >> 'my-project'
-        config.getZone() >> ['my-zone']
-        config.getRegion() >> ['my-region']
-        config.getPreemptible() >> true
-        // check request object
-        and:
         req.machineType == 'n1-1234'
         req.project == 'my-project'
         req.zone == ['my-zone']
@@ -333,11 +336,16 @@ class GoogleLifeSciencesTaskHandlerTest extends GoogleSpecification {
 
     def 'should create trace record'() {
         given:
-        def exec = Mock(Executor) { getName() >> 'google-pipelines' }
+        def executor = Mock(GoogleLifeSciencesExecutor)  {
+            getConfig() >> new GoogleLifeSciencesConfig(location: 'eu-east-1', preemptible: true)
+            getName() >> 'google-lifesciences'
+        }
+        and:
         def processor = Mock(TaskProcessor)
-        processor.getExecutor() >> exec
+        processor.getExecutor() >> executor
         processor.getName() >> 'foo'
         processor.getConfig() >> new ProcessConfig(Mock(BaseScript))
+        and:
         def task = Mock(TaskRun)
         task.getProcessor() >> processor
         task.getConfig() >> Mock(TaskConfig) { getMachineType() >> 'm1.large' }
@@ -345,13 +353,13 @@ class GoogleLifeSciencesTaskHandlerTest extends GoogleSpecification {
         def handler = Spy(GoogleLifeSciencesTaskHandler)
         handler.task = task
         handler.pipelineId = 'xyz-123'
-        handler.pipelineConfiguration = new GoogleLifeSciencesConfiguration(zone: ['eu-east-1'], preemptible: true)
+        handler.executor = executor
 
         when:
         def record = handler.getTraceRecord()
         then:
         record.get('native_id') == 'xyz-123'
-        record.getExecutorName() == 'google-pipelines'
+        record.getExecutorName() == 'google-lifesciences'
         record.machineInfo.type == 'm1.large'
         record.machineInfo.zone == 'eu-east-1'
         record.machineInfo.priceModel == PriceModel.spot

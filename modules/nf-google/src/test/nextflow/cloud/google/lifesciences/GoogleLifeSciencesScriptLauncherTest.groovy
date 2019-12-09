@@ -35,9 +35,11 @@ class GoogleLifeSciencesScriptLauncherTest extends GoogleSpecification {
         def session = new Session()
         def bucket = mockGsPath('gs://bucket/work/xx/yy')
         def binDir = mockGsPath('gs://bucket/bin')
-        def config = new GoogleLifeSciencesConfiguration(remoteBinDir: binDir)
-        def handler = [:] as GoogleLifeSciencesTaskHandler
-        handler.pipelineConfiguration = config
+        def handler = Mock(GoogleLifeSciencesTaskHandler) {
+            getExecutor() >> Mock(GoogleLifeSciencesExecutor) {
+                getConfig() >> new GoogleLifeSciencesConfig(remoteBinDir: binDir)
+            }
+        }
         def bean = [
                 name: 'Hello 1',
                 workDir: bucket,
@@ -63,9 +65,11 @@ class GoogleLifeSciencesScriptLauncherTest extends GoogleSpecification {
         given:
         def WORK_DIR = mockGsPath('gs://bucket/work/dir')
         def folder = Files.createTempDirectory('test')
-        def config = new GoogleLifeSciencesConfiguration()
-        def handler = [:] as GoogleLifeSciencesTaskHandler
-        handler.pipelineConfiguration = config
+        def handler = Mock(GoogleLifeSciencesTaskHandler) {
+            getExecutor() >> Mock(GoogleLifeSciencesExecutor) {
+                getConfig() >> new GoogleLifeSciencesConfig()
+            }
+        }
         def bean = [name: 'Hello 1',
                     script: 'echo Hello world!',
                     workDir: WORK_DIR] as TaskBean
