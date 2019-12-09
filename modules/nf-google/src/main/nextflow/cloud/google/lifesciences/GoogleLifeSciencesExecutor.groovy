@@ -49,7 +49,7 @@ class GoogleLifeSciencesExecutor extends Executor {
 
     private GoogleLifeSciencesHelper helper
 
-    Map env = new HashMap(System.getenv())
+    private Map env = new HashMap(System.getenv())
 
     @Override
     final boolean isContainerNative() {
@@ -87,7 +87,7 @@ class GoogleLifeSciencesExecutor extends Executor {
         //Make sure that the workdir is a GS Bucket
         if ( getWorkDir()?.scheme != 'gs' ) {
             session.abort()
-            throw new AbortOperationException("When using `google-lifesciences` executor a Google Storage bucket must be specified as a working directory -- Add the option `-w gs://<your-bucket/path>` to your run command line or specify a workDir in your config file")
+            throw new AbortOperationException("Executor `google-lifesciences` requires a Google Storage bucket to be specified as a working directory -- Add the option `-w gs://<your-bucket/path>` to your run command line or specify a workDir in your config file")
         }
 
         if( !env.get('GOOGLE_APPLICATION_CREDENTIALS') )

@@ -16,12 +16,11 @@
 package nextflow.cloud.google.lifesciences
 
 import java.nio.file.Path
+import java.nio.file.Paths
 
-import com.google.cloud.storage.contrib.nio.CloudStorageFileSystem
 import nextflow.Session
 import nextflow.cloud.google.GoogleSpecification
 import nextflow.exception.AbortOperationException
-import spock.lang.Ignore
 import spock.lang.Shared
 
 class GoogleLifeSciencesExecutorTest extends GoogleSpecification {
@@ -42,12 +41,15 @@ class GoogleLifeSciencesExecutorTest extends GoogleSpecification {
             ]
     ]
 
+    @Shared
+    Map ENV = [GOOGLE_APPLICATION_CREDENTIALS: '/some/file.json']
+
     def 'should abort operation when the workdir is not a CloudStoragePath'() {
         given:
         def session = Stub(Session)
         session.workDir = Stub(Path)
-        def executor = new GoogleLifeSciencesExecutor()
-        executor.session = session
+        and:
+        def executor = new GoogleLifeSciencesExecutor(env: ENV, session: session)
 
         when:
         executor.register()
@@ -69,8 +71,8 @@ class GoogleLifeSciencesExecutorTest extends GoogleSpecification {
                         "zone" : "testZone"
                 ]
         ]
-        def executor = new GoogleLifeSciencesExecutor()
-        executor.session = session
+        and:
+        def executor = new GoogleLifeSciencesExecutor(env: ENV, session: session)
 
         when:
         executor.register()
@@ -92,8 +94,8 @@ class GoogleLifeSciencesExecutorTest extends GoogleSpecification {
                         "project" : "testproject"
                 ]
         ]
-        def executor = new GoogleLifeSciencesExecutor()
-        executor.session = session
+        and:
+        def executor = new GoogleLifeSciencesExecutor(env: ENV, session: session)
 
         when:
         executor.register()
@@ -118,8 +120,8 @@ class GoogleLifeSciencesExecutorTest extends GoogleSpecification {
                         "region" : "testRegion"
                 ]
         ]
-        def executor = new GoogleLifeSciencesExecutor()
-        executor.session = session
+        and:
+        def executor = new GoogleLifeSciencesExecutor(env: ENV, session: session)
 
         when:
         executor.register()
@@ -130,44 +132,15 @@ class GoogleLifeSciencesExecutorTest extends GoogleSpecification {
     }
 
 
-
-    @Ignore
-    def 'should abort operation when required configuration keys are missing'() {
-        given:
-        def session = Stub(Session)
-        def path = CloudStorageFileSystem.forBucket("test").getPath("/")
-        session.workDir >> path
-        session.config >> [
-                "google" : [
-                        (key) : configValue
-                ]
-        ]
-        def executor = new GoogleLifeSciencesExecutor()
-        executor.session = session
-
-        when:
-        executor.register()
-
-        then:
-        def error = thrown(AbortOperationException)
-        !error.getMessage().contains(configKey.toString())
-
-        where:
-        key         |   configKey     |   configValue
-        "project"   | "google.project"   |   "testProject"
-        "zone"      | "google.zone"      |   "testZone"
-    }
-
     def 'should register successfully with zone'()  {
         given:
         def session = Mock(Session)
-        def helper = Mock(GoogleLifeSciencesHelper)
         def path = mockGsPath('gs://foo/work/dir')
         session.bucketDir >> path
         session.binDir >> null
         session.config >> validZoneConfig
-        def executor = new GoogleLifeSciencesExecutor(helper: helper)
-        executor.session = session
+        and:
+        def executor = new GoogleLifeSciencesExecutor(env: ENV, session: session)
 
         when:
         executor.register()
@@ -180,13 +153,12 @@ class GoogleLifeSciencesExecutorTest extends GoogleSpecification {
     def 'should register successfully with region'()  {
         given:
         def session = Mock(Session)
-        def helper = Mock(GoogleLifeSciencesHelper)
         def path = mockGsPath('gs://foo/bar')
         session.bucketDir >> path
         session.config >> validRegionConfig
         session.binDir >> null
-        def executor = new GoogleLifeSciencesExecutor(helper: helper)
-        executor.session = session
+        and:
+        def executor = new GoogleLifeSciencesExecutor(env: ENV, session: session)
 
         when:
         executor.register()
@@ -196,10 +168,41 @@ class GoogleLifeSciencesExecutorTest extends GoogleSpecification {
         executor.config.regions == validRegionConfig.google?.region?.split(",")?.toList()
     }
 
+    def 'should stop on missing credentials' () {
+        given:
+        def session = Mock(Session)
+        def path = mockGsPath('gs://foo/bar')
+        session.bucketDir >> path
+        session.binDir >> null
+        and:
+        def executor = new GoogleLifeSciencesExecutor(env: [:], session: session)
+
+        when:
+        executor.register()
+        then:
+        def err = thrown(AbortOperationException)
+        err.message.startsWith('Missing Google credentials')
+    }
+
+    def 'should stop on missing bucket' () {
+        given:
+        def session = Mock(Session)
+        def path = Paths.get('/local/dir')
+        session.bucketDir >> path
+        session.binDir >> null
+        and:
+        def executor = new GoogleLifeSciencesExecutor(env: ENV, session: session)
+
+        when:
+        executor.register()
+        then:
+        def err = thrown(AbortOperationException)
+        err.message.startsWith('Executor `google-lifesciences` requires a Google Storage bucket to be specified as a working directory')
+    }
+
     def 'should be containerNative'() {
         when:
         def executor = new GoogleLifeSciencesExecutor()
-
         then:
         executor.isContainerNative()
     }
