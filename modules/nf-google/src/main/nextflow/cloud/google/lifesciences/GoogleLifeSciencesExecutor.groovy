@@ -46,11 +46,11 @@ import nextflow.util.ServiceName
 @CompileStatic
 @ServiceName('google-pipelines')
 @SupportedScriptTypes(ScriptType.SCRIPTLET)
-class GooglePipelinesExecutor extends Executor {
+class GoogleLifeSciencesExecutor extends Executor {
 
-    private GooglePipelinesConfiguration pipelineConfig
+    private GoogleLifeSciencesConfiguration pipelineConfig
 
-    private GooglePipelinesHelper helper
+    private GoogleLifeSciencesHelper helper
 
     Map env = new HashMap(System.getenv())
 
@@ -78,11 +78,11 @@ class GooglePipelinesExecutor extends Executor {
 
     @Override
     TaskHandler createTaskHandler(TaskRun task) {
-        return new GooglePipelinesTaskHandler(task, this, pipelineConfig)
+        return new GoogleLifeSciencesTaskHandler(task, this, pipelineConfig)
     }
 
     @PackageScope
-    GooglePipelinesHelper getHelper() { return helper }
+    GoogleLifeSciencesHelper getHelper() { return helper }
 
     private void initialize0() {
 
@@ -136,13 +136,13 @@ class GooglePipelinesExecutor extends Executor {
         if( !env.get('GOOGLE_APPLICATION_CREDENTIALS') )
             throw new AbortOperationException('Missing Google credentials -- make sure your environment defines the GOOGLE_APPLICATION_CREDENTIALS environment variable')
 
-        pipelineConfig = new GooglePipelinesConfiguration(
+        pipelineConfig = new GoogleLifeSciencesConfiguration(
                 session.config.navigate("google.project") as String,
                 zones,
                 regions,
                 remoteBinDir,
                 session.config.navigate("cloud.preemptible") as boolean )
 
-        helper = new GooglePipelinesHelper().init()
+        helper = new GoogleLifeSciencesHelper().init()
     }
 }

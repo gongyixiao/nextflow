@@ -33,12 +33,12 @@ import nextflow.util.Escape
  */
 @Slf4j
 @CompileStatic
-class GooglePipelinesFileCopyStrategy extends SimpleFileCopyStrategy implements TaskDirWrangler {
+class GoogleLifeSciencesFileCopyStrategy extends SimpleFileCopyStrategy implements LifeSciencesTaskDirWrangler {
 
-    GooglePipelinesTaskHandler handler
+    GoogleLifeSciencesTaskHandler handler
     TaskBean task
 
-    GooglePipelinesFileCopyStrategy(TaskBean bean, GooglePipelinesTaskHandler handler) {
+    GoogleLifeSciencesFileCopyStrategy(TaskBean bean, GoogleLifeSciencesTaskHandler handler) {
         super(bean)
         this.handler = handler
         this.task = bean

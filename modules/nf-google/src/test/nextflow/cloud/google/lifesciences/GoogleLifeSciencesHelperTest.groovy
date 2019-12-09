@@ -15,7 +15,7 @@
  */
 package nextflow.cloud.google.lifesciences
 
-import static nextflow.cloud.google.lifesciences.GooglePipelinesHelper.*
+import static GoogleLifeSciencesHelper.*
 
 import com.google.api.services.lifesciences.v2beta.CloudLifeSciences
 import com.google.api.services.lifesciences.v2beta.model.Action
@@ -29,7 +29,7 @@ import com.google.auth.oauth2.GoogleCredentials
 import nextflow.executor.res.AcceleratorResource
 import spock.lang.Specification
 
-class GooglePipelinesHelperTest extends Specification {
+class GoogleLifeSciencesHelperTest extends Specification {
 
     def mockClient = Mock(CloudLifeSciences) {
         projects() >> Mock(CloudLifeSciences.Projects) {
@@ -49,7 +49,7 @@ class GooglePipelinesHelperTest extends Specification {
         given:
         def longName = "x" * 65
         def spaces = "this is a name"
-        def helper = new GooglePipelinesHelper()
+        def helper = new GoogleLifeSciencesHelper()
 
         when:
         def longSanitized = helper.sanitizeName(longName)
@@ -63,7 +63,7 @@ class GooglePipelinesHelperTest extends Specification {
     def 'should initialize the genomics client'() {
         given:
         def stubCredential = Stub(GoogleCredentials)
-        def helper = new GooglePipelinesHelper(stubCredential,"testName")
+        def helper = new GoogleLifeSciencesHelper(stubCredential,"testName")
 
         when:
         helper.init()
@@ -79,9 +79,9 @@ class GooglePipelinesHelperTest extends Specification {
         def imageName = "imageName"
         def commands = ["command1","command2"]
         def mounts = []
-        def flags = [GooglePipelinesHelper.ActionFlags.ALWAYS_RUN]
+        def flags = [GoogleLifeSciencesHelper.ActionFlags.ALWAYS_RUN]
         def entryPoint = "entryPoint"
-        def helper = new GooglePipelinesHelper()
+        def helper = new GoogleLifeSciencesHelper()
 
 
         when:
@@ -112,7 +112,7 @@ class GooglePipelinesHelperTest extends Specification {
         given:
         def actions = [new Action(),new Action()]
         def resources = new Resources().setRegions(['foo'])
-        def helper = new GooglePipelinesHelper()
+        def helper = new GoogleLifeSciencesHelper()
 
         when:
         def pipe = helper.createPipeline(actions,resources)
@@ -133,7 +133,7 @@ class GooglePipelinesHelperTest extends Specification {
         def scopes = ["scope1","scope2"]
         def preEmptible = true
         def acc = new AcceleratorResource(request: 4, type: 'nvidia-tesla-k80')
-        def helper = new GooglePipelinesHelper()
+        def helper = new GoogleLifeSciencesHelper()
 
         when:
         def resources1 = helper.configureResources(type,zone,null,diskName,100, scopes,preEmptible, null)
@@ -180,7 +180,7 @@ class GooglePipelinesHelperTest extends Specification {
     def 'should check on the status of an operation'() {
         given:
         def op = new Operation().setName("testOperation")
-        def helper = new GooglePipelinesHelper()
+        def helper = new GoogleLifeSciencesHelper()
         helper.client = mockClient
 
         when:
@@ -196,7 +196,7 @@ class GooglePipelinesHelperTest extends Specification {
     def 'should cancel an operation'() {
         given:
         def op = new Operation().setName("testOperation").setDone(false)
-        def helper = new GooglePipelinesHelper()
+        def helper = new GoogleLifeSciencesHelper()
         helper.client = mockClient
 
         when:
@@ -211,7 +211,7 @@ class GooglePipelinesHelperTest extends Specification {
         def pipe = new Pipeline()
         def request = new RunPipelineRequest().setPipeline(pipe)
 
-        def helper = new GooglePipelinesHelper()
+        def helper = new GoogleLifeSciencesHelper()
         helper.client = mockClient
 
         when:
@@ -225,8 +225,8 @@ class GooglePipelinesHelperTest extends Specification {
 
     def 'should create a resource request' () {
         given:
-        def helper = Spy(GooglePipelinesHelper)
-        def req = Mock(GooglePipelinesSubmitRequest)
+        def helper = Spy(GoogleLifeSciencesHelper)
+        def req = Mock(GoogleLifeSciencesSubmitRequest)
 
         when:
         def res = helper.createResources(req)
@@ -244,7 +244,7 @@ class GooglePipelinesHelperTest extends Specification {
                 ['my-region'],
                 'my-disk',
                 500,
-                [GooglePipelinesHelper.SCOPE_CLOUD_PLATFORM],
+                [GoogleLifeSciencesHelper.SCOPE_CLOUD_PLATFORM],
                 true,
                 null )
 
@@ -258,8 +258,8 @@ class GooglePipelinesHelperTest extends Specification {
 
     def 'should create main action' () {
         given:
-        def helper = Spy(GooglePipelinesHelper)
-        def req = Mock(GooglePipelinesSubmitRequest)
+        def helper = Spy(GoogleLifeSciencesHelper)
+        def req = Mock(GoogleLifeSciencesSubmitRequest)
         def mount = new Mount()
 
         when:
@@ -287,8 +287,8 @@ class GooglePipelinesHelperTest extends Specification {
 
     def 'should create staging action' () {
         given:
-        def helper = Spy(GooglePipelinesHelper)
-        def req = Mock(GooglePipelinesSubmitRequest)
+        def helper = Spy(GoogleLifeSciencesHelper)
+        def req = Mock(GoogleLifeSciencesSubmitRequest)
         def mount = new Mount()
 
         when:
@@ -318,8 +318,8 @@ class GooglePipelinesHelperTest extends Specification {
 
     def 'should create unstaging action' () {
         given:
-        def helper = Spy(GooglePipelinesHelper)
-        def req = Mock(GooglePipelinesSubmitRequest)
+        def helper = Spy(GoogleLifeSciencesHelper)
+        def req = Mock(GoogleLifeSciencesSubmitRequest)
         def mount = new Mount()
 
         when:
@@ -351,7 +351,7 @@ class GooglePipelinesHelperTest extends Specification {
 
     def 'should submit pipeline request' () {
         given:
-        def helper = Spy(GooglePipelinesHelper)
+        def helper = Spy(GoogleLifeSciencesHelper)
         def stage = GroovyMock(Action)
         def unstage = GroovyMock(Action)
         def main = GroovyMock(Action)
@@ -359,7 +359,7 @@ class GooglePipelinesHelperTest extends Specification {
         def operation = GroovyMock(Operation)
         and:
         def pipeline = new Pipeline()
-        def req = new GooglePipelinesSubmitRequest(location: 'LOC-1', project: 'PRJ-X', taskName: 'foo')
+        def req = new GoogleLifeSciencesSubmitRequest(location: 'LOC-1', project: 'PRJ-X', taskName: 'foo')
 
         when:
         def result = helper.submitPipeline(req)
@@ -377,7 +377,7 @@ class GooglePipelinesHelperTest extends Specification {
 
     def 'should set action flags' () {
         given:
-        def helper = new GooglePipelinesHelper()
+        def helper = new GoogleLifeSciencesHelper()
 
         expect:
         helper

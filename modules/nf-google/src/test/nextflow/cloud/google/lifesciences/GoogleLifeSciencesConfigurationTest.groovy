@@ -17,7 +17,7 @@ package nextflow.cloud.google.lifesciences
 
 import spock.lang.Specification
 
-class GooglePipelinesConfigurationTest extends Specification {
+class GoogleLifeSciencesConfigurationTest extends Specification {
 
     def 'should construct correctly'() {
         given:
@@ -28,8 +28,8 @@ class GooglePipelinesConfigurationTest extends Specification {
         def remoteBinDir = null
 
         when:
-        def config1 = new GooglePipelinesConfiguration(name,testZone,testRegion,remoteBinDir,preemp)
-        def config2 = new GooglePipelinesConfiguration(name,testZone,testRegion)
+        def config1 = new GoogleLifeSciencesConfiguration(name,testZone,testRegion,remoteBinDir,preemp)
+        def config2 = new GoogleLifeSciencesConfiguration(name,testZone,testRegion)
 
         then:
         with(config1) {

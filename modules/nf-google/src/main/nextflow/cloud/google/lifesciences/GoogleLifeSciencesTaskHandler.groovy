@@ -46,15 +46,15 @@ import nextflow.util.MemoryUnit
  */
 @CompileStatic
 @Slf4j
-class GooglePipelinesTaskHandler extends TaskHandler {
+class GoogleLifeSciencesTaskHandler extends TaskHandler {
 
     public final static String DEFAULT_DISK_NAME = "nf-pipeline-work"
 
     public final static String DEFAULT_COPY_IMAGE = "google/cloud-sdk:alpine"
 
-    GooglePipelinesExecutor executor
+    GoogleLifeSciencesExecutor executor
 
-    GooglePipelinesConfiguration pipelineConfiguration
+    GoogleLifeSciencesConfiguration pipelineConfiguration
 
     private TaskBean taskBean
 
@@ -70,9 +70,9 @@ class GooglePipelinesTaskHandler extends TaskHandler {
 
     private String pipelineId
 
-    private GooglePipelinesHelper helper
+    private GoogleLifeSciencesHelper helper
 
-    GooglePipelinesTaskHandler(TaskRun task, GooglePipelinesExecutor executor, GooglePipelinesConfiguration pipelineConfiguration) {
+    GoogleLifeSciencesTaskHandler(TaskRun task, GoogleLifeSciencesExecutor executor, GoogleLifeSciencesConfiguration pipelineConfiguration) {
         super(task)
 
         this.executor = executor
@@ -89,7 +89,7 @@ class GooglePipelinesTaskHandler extends TaskHandler {
 
 
     /* ONLY FOR TESTING PURPOSE */
-    protected GooglePipelinesTaskHandler() {
+    protected GoogleLifeSciencesTaskHandler() {
 
     }
 
@@ -272,18 +272,18 @@ class GooglePipelinesTaskHandler extends TaskHandler {
 
     @PackageScope
     void createTaskWrapper() {
-        new GooglePipelinesScriptLauncher(this.taskBean, this) .build()
+        new GoogleLifeSciencesScriptLauncher(this.taskBean, this) .build()
     }
 
     @PackageScope
-    Operation submitPipeline(GooglePipelinesSubmitRequest request) {
+    Operation submitPipeline(GoogleLifeSciencesSubmitRequest request) {
         helper.submitPipeline(request)
     }
 
     @PackageScope
-    GooglePipelinesSubmitRequest createPipelineRequest() {
+    GoogleLifeSciencesSubmitRequest createPipelineRequest() {
         //Create the mount for out work files.
-        def req = new GooglePipelinesSubmitRequest()
+        def req = new GoogleLifeSciencesSubmitRequest()
         req.machineType = getMachineType()
         req.project = pipelineConfiguration.project
         req.zone = pipelineConfiguration.zone

@@ -24,7 +24,7 @@ import spock.lang.Ignore
 import spock.lang.Shared
 import spock.lang.Specification
 
-class GooglePipelinesExecutorTest extends Specification {
+class GoogleLifeSciencesExecutorTest extends Specification {
 
     @Shared
     def validZoneConfig = [
@@ -46,7 +46,7 @@ class GooglePipelinesExecutorTest extends Specification {
         given:
         def session = Stub(Session)
         session.workDir = Stub(Path)
-        def executor = new GooglePipelinesExecutor()
+        def executor = new GoogleLifeSciencesExecutor()
         executor.session = session
 
         when:
@@ -68,7 +68,7 @@ class GooglePipelinesExecutorTest extends Specification {
                         "zone" : "testZone"
                 ]
         ]
-        def executor = new GooglePipelinesExecutor()
+        def executor = new GoogleLifeSciencesExecutor()
         executor.session = session
 
         when:
@@ -90,7 +90,7 @@ class GooglePipelinesExecutorTest extends Specification {
                         "project" : "testproject"
                 ]
         ]
-        def executor = new GooglePipelinesExecutor()
+        def executor = new GoogleLifeSciencesExecutor()
         executor.session = session
 
         when:
@@ -114,7 +114,7 @@ class GooglePipelinesExecutorTest extends Specification {
                         "region" : "testRegion"
                 ]
         ]
-        def executor = new GooglePipelinesExecutor()
+        def executor = new GoogleLifeSciencesExecutor()
         executor.session = session
 
         when:
@@ -138,7 +138,7 @@ class GooglePipelinesExecutorTest extends Specification {
                         (key) : configValue
                 ]
         ]
-        def executor = new GooglePipelinesExecutor()
+        def executor = new GoogleLifeSciencesExecutor()
         executor.session = session
 
         when:
@@ -157,11 +157,11 @@ class GooglePipelinesExecutorTest extends Specification {
     def 'should register successfully with zone'()  {
         given:
         def session = Stub(Session)
-        def helper = Mock(GooglePipelinesHelper)
+        def helper = Mock(GoogleLifeSciencesHelper)
         def path = CloudStorageFileSystem.forBucket("test").getPath("/")
         session.bucketDir >> path
         session.config >> validZoneConfig
-        def executor = new GooglePipelinesExecutor(helper: helper)
+        def executor = new GoogleLifeSciencesExecutor(helper: helper)
         executor.session = session
 
         when:
@@ -175,11 +175,11 @@ class GooglePipelinesExecutorTest extends Specification {
     def 'should register successfully with region'()  {
         given:
         def session = Stub(Session)
-        def helper = Mock(GooglePipelinesHelper)
+        def helper = Mock(GoogleLifeSciencesHelper)
         def path = CloudStorageFileSystem.forBucket("test").getPath("/")
         session.bucketDir >> path
         session.config >> validRegionConfig
-        def executor = new GooglePipelinesExecutor(helper: helper)
+        def executor = new GoogleLifeSciencesExecutor(helper: helper)
         executor.session = session
 
         when:
@@ -192,7 +192,7 @@ class GooglePipelinesExecutorTest extends Specification {
 
     def 'should be containerNative'() {
         when:
-        def executor = new GooglePipelinesExecutor()
+        def executor = new GoogleLifeSciencesExecutor()
 
         then:
         executor.isContainerNative()

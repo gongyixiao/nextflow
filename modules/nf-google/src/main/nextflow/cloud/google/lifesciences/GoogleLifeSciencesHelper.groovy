@@ -48,7 +48,7 @@ import nextflow.executor.res.AcceleratorResource
  */
 @Slf4j
 @CompileStatic
-class GooglePipelinesHelper {
+class GoogleLifeSciencesHelper {
 
     private static final String SCOPE_CLOUD_PLATFORM = "https://www.googleapis.com/auth/cloud-platform"
     private static final List<String> ENV_VAR_TO_INCLUDE = ["NXF_DEBUG"]
@@ -72,7 +72,7 @@ class GooglePipelinesHelper {
         DISABLE_STANDARD_ERROR_CAPTURE
     }
 
-    GooglePipelinesHelper(GoogleCredentials credential = null, String name = "Nextflow GoogleLifeScience") {
+    GoogleLifeSciencesHelper(GoogleCredentials credential = null, String name = "Nextflow GoogleLifeScience") {
         this.credentials = credential
         this.applicationName = name
     }
@@ -81,7 +81,7 @@ class GooglePipelinesHelper {
         name.replaceAll(/[^a-zA-Z0-9\-_]+/, '-').take(63)
     }
 
-    GooglePipelinesHelper init() {
+    GoogleLifeSciencesHelper init() {
         if (!credentials)
             credentials = GoogleCredentials.getApplicationDefault()
 
@@ -139,7 +139,7 @@ class GooglePipelinesHelper {
         new Pipeline().setActions(actions).setResources(resources)
     }
 
-    Operation submitPipeline(GooglePipelinesSubmitRequest req) {
+    Operation submitPipeline(GoogleLifeSciencesSubmitRequest req) {
 
         final actions = new ArrayList(5)
         actions.add(createStagingAction(req))
@@ -151,7 +151,7 @@ class GooglePipelinesHelper {
         runPipeline(req.project, req.location, pipeline, ["taskName" : req.taskName])
     }
 
-    protected Resources createResources(GooglePipelinesSubmitRequest req) {
+    protected Resources createResources(GoogleLifeSciencesSubmitRequest req) {
         configureResources(
                 req.machineType,
                 req.zone,
@@ -164,7 +164,7 @@ class GooglePipelinesHelper {
         )
     }
 
-    protected Action createMainAction(GooglePipelinesSubmitRequest req) {
+    protected Action createMainAction(GoogleLifeSciencesSubmitRequest req) {
         createAction(
                 "$req.taskName-main",
                 req.containerImage,
@@ -172,7 +172,7 @@ class GooglePipelinesHelper {
                 [req.sharedMount] )
     }
 
-    protected Action createStagingAction(GooglePipelinesSubmitRequest req) {
+    protected Action createStagingAction(GoogleLifeSciencesSubmitRequest req) {
         createAction(
                 "$req.taskName-stage",
                 req.fileCopyImage,
@@ -180,7 +180,7 @@ class GooglePipelinesHelper {
                 [req.sharedMount] )
     }
 
-    protected Action createUnstagingAction(GooglePipelinesSubmitRequest req) {
+    protected Action createUnstagingAction(GoogleLifeSciencesSubmitRequest req) {
         createAction(
                 "$req.taskName-unstage",
                 req.fileCopyImage,

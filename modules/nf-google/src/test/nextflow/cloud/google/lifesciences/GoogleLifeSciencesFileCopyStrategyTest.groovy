@@ -22,7 +22,7 @@ import nextflow.processor.TaskBean
  *
  * @author Paolo Di Tommaso <paolo.ditommaso@gmail.com>
  */
-class GooglePipelinesFileCopyStrategyTest extends GoogleSpecification {
+class GoogleLifeSciencesFileCopyStrategyTest extends GoogleSpecification {
 
 
     def 'create stage files' () {
@@ -30,11 +30,11 @@ class GooglePipelinesFileCopyStrategyTest extends GoogleSpecification {
         def bean = Mock(TaskBean) {
             getWorkDir() >> mockGsPath('gs://my-bucket/work/xx/yy')
         }
-        def handler = Mock(GooglePipelinesTaskHandler) {
-            getPipelineConfiguration() >> Mock(GooglePipelinesConfiguration)
+        def handler = Mock(GoogleLifeSciencesTaskHandler) {
+            getPipelineConfiguration() >> Mock(GoogleLifeSciencesConfiguration)
         }
         and:
-        def strategy = new GooglePipelinesFileCopyStrategy(bean, handler)
+        def strategy = new GoogleLifeSciencesFileCopyStrategy(bean, handler)
 
         // file with the same name
         when:
@@ -104,11 +104,11 @@ class GooglePipelinesFileCopyStrategyTest extends GoogleSpecification {
         def bean = Mock(TaskBean) {
             getWorkDir() >> mockGsPath('gs://my-bucket/work/xx/yy')
         }
-        def handler = Mock(GooglePipelinesTaskHandler) {
-            getPipelineConfiguration() >> Mock(GooglePipelinesConfiguration)
+        def handler = Mock(GoogleLifeSciencesTaskHandler) {
+            getPipelineConfiguration() >> Mock(GoogleLifeSciencesConfiguration)
         }
         and:
-        def strategy = new GooglePipelinesFileCopyStrategy(bean, handler)
+        def strategy = new GoogleLifeSciencesFileCopyStrategy(bean, handler)
 
         when:
         def result = strategy.getUnstageOutputFilesScript(['foo.txt'], mockGsPath('gs://other/dir'))
@@ -134,11 +134,11 @@ class GooglePipelinesFileCopyStrategyTest extends GoogleSpecification {
         def bean = Mock(TaskBean) {
             getWorkDir() >> mockGsPath('gs://my-bucket/work/xx/yy')
         }
-        def handler = Mock(GooglePipelinesTaskHandler) {
-            getPipelineConfiguration() >> Mock(GooglePipelinesConfiguration)
+        def handler = Mock(GoogleLifeSciencesTaskHandler) {
+            getPipelineConfiguration() >> Mock(GoogleLifeSciencesConfiguration)
         }
         and:
-        def strategy = new GooglePipelinesFileCopyStrategy(bean, handler)
+        def strategy = new GoogleLifeSciencesFileCopyStrategy(bean, handler)
 
 
         when:
@@ -155,14 +155,14 @@ class GooglePipelinesFileCopyStrategyTest extends GoogleSpecification {
         def bean = Mock(TaskBean) {
             getWorkDir() >> mockGsPath('gs://my-bucket/work/xx/yy')
         }
-        def config = Mock(GooglePipelinesConfiguration) {
+        def config = Mock(GoogleLifeSciencesConfiguration) {
             getRemoteBinDir() >> mockGsPath('gs://my-bucket/bin/d i r')
         }
-        def handler = Mock(GooglePipelinesTaskHandler) {
+        def handler = Mock(GoogleLifeSciencesTaskHandler) {
             getPipelineConfiguration() >> config
         }
         and:
-        def strategy = new GooglePipelinesFileCopyStrategy(bean, handler)
+        def strategy = new GoogleLifeSciencesFileCopyStrategy(bean, handler)
 
 
         when:

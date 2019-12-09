@@ -35,10 +35,10 @@ import nextflow.script.ProcessConfig
 import nextflow.util.CacheHelper
 import spock.lang.Shared
 
-class GooglePipelinesTaskHandlerTest extends GoogleSpecification {
+class GoogleLifeSciencesTaskHandlerTest extends GoogleSpecification {
 
     @Shared
-    GooglePipelinesConfiguration pipeConfig = new GooglePipelinesConfiguration("testProject",["testZone"],["testRegion"])
+    GoogleLifeSciencesConfiguration pipeConfig = new GoogleLifeSciencesConfiguration("testProject",["testZone"],["testRegion"])
 
     @Shared
     UUID uuid = new UUID(4,4)
@@ -49,9 +49,9 @@ class GooglePipelinesTaskHandlerTest extends GoogleSpecification {
         getConfig() >> ["cloud" : ["instanceType": "instanceType"]]
     }
 
-    GooglePipelinesExecutor stubExecutor = GroovyStub() {
+    GoogleLifeSciencesExecutor stubExecutor = GroovyStub() {
         getSession() >> stubSession
-        getHelper() >> GroovyMock(GooglePipelinesHelper)
+        getHelper() >> GroovyMock(GoogleLifeSciencesHelper)
     }
 
     TaskRun stubTaskRunner = GroovyStub {
@@ -70,7 +70,7 @@ class GooglePipelinesTaskHandlerTest extends GoogleSpecification {
         }
 
         when: 'handler is constructed'
-        def handler = new GooglePipelinesTaskHandler(noContainerTaskRunner,stubExecutor,pipeConfig)
+        def handler = new GoogleLifeSciencesTaskHandler(noContainerTaskRunner,stubExecutor,pipeConfig)
 
         then: 'we should get an error stating that container definition is missing'
         def error = thrown(ProcessUnrecoverableException)
@@ -81,7 +81,7 @@ class GooglePipelinesTaskHandlerTest extends GoogleSpecification {
 
     def 'should construct correctly'() {
         when:
-        def handler = new GooglePipelinesTaskHandler(stubTaskRunner, stubExecutor,pipeConfig)
+        def handler = new GoogleLifeSciencesTaskHandler(stubTaskRunner, stubExecutor,pipeConfig)
 
         then:
         handler.task.container == "testContainer"
@@ -94,10 +94,10 @@ class GooglePipelinesTaskHandlerTest extends GoogleSpecification {
         def task = Mock(TaskRun)
         task.getName() >> 'foo'
 
-        def handler = Spy(GooglePipelinesTaskHandler)
+        def handler = Spy(GoogleLifeSciencesTaskHandler)
         handler.task = task
 
-        def req = Mock(GooglePipelinesSubmitRequest)
+        def req = Mock(GoogleLifeSciencesSubmitRequest)
         def operation = new Operation()
 
         when:
@@ -117,12 +117,12 @@ class GooglePipelinesTaskHandlerTest extends GoogleSpecification {
 
     def 'should check submitPipeline' () {
         given:
-        def helper = Mock(GooglePipelinesHelper)
-        def executor = new GooglePipelinesExecutor(helper: helper)
-        def handler = new GooglePipelinesTaskHandler(executor: executor, helper: helper)
+        def helper = Mock(GoogleLifeSciencesHelper)
+        def executor = new GoogleLifeSciencesExecutor(helper: helper)
+        def handler = new GoogleLifeSciencesTaskHandler(executor: executor, helper: helper)
 
         def operation = new Operation()
-        def request = Mock(GooglePipelinesSubmitRequest)
+        def request = Mock(GoogleLifeSciencesSubmitRequest)
 
         when:
         def op = handler.submitPipeline(request)
@@ -134,9 +134,9 @@ class GooglePipelinesTaskHandlerTest extends GoogleSpecification {
     def 'should create pipeline request' () {
         given:
 
-        def helper = Mock(GooglePipelinesHelper)
-        def executor = new GooglePipelinesExecutor(helper: helper)
-        def config = Mock(GooglePipelinesConfiguration)
+        def helper = Mock(GoogleLifeSciencesHelper)
+        def executor = new GoogleLifeSciencesExecutor(helper: helper)
+        def config = Mock(GoogleLifeSciencesConfiguration)
         def workDir = mockGsPath('gs://my-bucket/work/dir')
 
         def task = Mock(TaskRun)
@@ -146,7 +146,7 @@ class GooglePipelinesTaskHandlerTest extends GoogleSpecification {
         task.getContainer() >> 'my/image'
         task.getConfig() >> new TaskConfig(disk: '250 GB', machineType: 'n1-1234')
 
-        def handler = new GooglePipelinesTaskHandler(
+        def handler = new GoogleLifeSciencesTaskHandler(
                 pipelineConfiguration: config,
                 executor: executor,
                 task: task )
@@ -165,17 +165,17 @@ class GooglePipelinesTaskHandlerTest extends GoogleSpecification {
         req.project == 'my-project'
         req.zone == ['my-zone']
         req.region == ['my-region']
-        req.diskName == GooglePipelinesTaskHandler.DEFAULT_DISK_NAME
+        req.diskName == GoogleLifeSciencesTaskHandler.DEFAULT_DISK_NAME
         req.diskSizeGb == 250
         req.preemptible
         req.taskName == "nf-bad893071e9130b866d43a4fcabb95b6"
         req.containerImage == 'my/image'
-        req.fileCopyImage == GooglePipelinesTaskHandler.DEFAULT_COPY_IMAGE
+        req.fileCopyImage == GoogleLifeSciencesTaskHandler.DEFAULT_COPY_IMAGE
         req.workDir.toUriString() == 'gs://my-bucket/work/dir'
         req.remoteTaskDir == 'gs://my-bucket/work/dir'
         req.localTaskDir == '/work/dir'
         req.sharedMount.getPath() == '/work/dir'
-        req.sharedMount.getDisk() == GooglePipelinesTaskHandler.DEFAULT_DISK_NAME
+        req.sharedMount.getDisk() == GoogleLifeSciencesTaskHandler.DEFAULT_DISK_NAME
         !req.sharedMount.getReadOnly()
     }
 
@@ -189,13 +189,13 @@ class GooglePipelinesTaskHandlerTest extends GoogleSpecification {
         task.getWorkDir() >> Paths.get('/work/dir')
 
         // -- executor
-        def helper = Mock(GooglePipelinesHelper)
-        def executor = new GooglePipelinesExecutor(helper: helper)
+        def helper = Mock(GoogleLifeSciencesHelper)
+        def executor = new GoogleLifeSciencesExecutor(helper: helper)
 
         def operation = new Operation()
 
         // -- handler
-        def handler = Spy(GooglePipelinesTaskHandler)
+        def handler = Spy(GoogleLifeSciencesTaskHandler)
         handler.executor = executor
         handler.task = task
         handler.operation = operation
@@ -236,11 +236,11 @@ class GooglePipelinesTaskHandlerTest extends GoogleSpecification {
         task.getWorkDir() >> Paths.get('/work/dir')
 
         // -- executor
-        def helper = Mock(GooglePipelinesHelper)
-        def executor = new GooglePipelinesExecutor(helper:helper)
+        def helper = Mock(GoogleLifeSciencesHelper)
+        def executor = new GoogleLifeSciencesExecutor(helper:helper)
 
         // -- handler
-        def handler = Spy(GooglePipelinesTaskHandler)
+        def handler = Spy(GoogleLifeSciencesTaskHandler)
         handler.executor = executor
         handler.task = task
         handler.helper = helper
@@ -271,14 +271,14 @@ class GooglePipelinesTaskHandlerTest extends GoogleSpecification {
     def 'should get jobId from operation' () {
         given:
         def operation = new Operation().setName('projects/rare-lattice-222412/operations/16737869387120678662')
-        def handler = [:] as GooglePipelinesTaskHandler
+        def handler = [:] as GoogleLifeSciencesTaskHandler
         expect:
         handler.getPipelineIdFromOp(operation) == '16737869387120678662'
     }
 
     def 'should get events from operation' () {
         given:
-        def handler = [:] as GooglePipelinesTaskHandler
+        def handler = [:] as GoogleLifeSciencesTaskHandler
 
         when:
         def op = new Operation()
@@ -309,7 +309,7 @@ class GooglePipelinesTaskHandlerTest extends GoogleSpecification {
         def mountPath = "testPath"
         def readOnly = true
         and:
-        def handler = Spy(GooglePipelinesTaskHandler)
+        def handler = Spy(GoogleLifeSciencesTaskHandler)
 
         when:
         def mount1 = handler.configureMount(diskName,mountPath,readOnly)
@@ -342,10 +342,10 @@ class GooglePipelinesTaskHandlerTest extends GoogleSpecification {
         task.getProcessor() >> processor
         task.getConfig() >> Mock(TaskConfig) { getMachineType() >> 'm1.large' }
         and:
-        def handler = Spy(GooglePipelinesTaskHandler)
+        def handler = Spy(GoogleLifeSciencesTaskHandler)
         handler.task = task
         handler.pipelineId = 'xyz-123'
-        handler.pipelineConfiguration = new GooglePipelinesConfiguration(zone: ['eu-east-1'], preemptible: true)
+        handler.pipelineConfiguration = new GoogleLifeSciencesConfiguration(zone: ['eu-east-1'], preemptible: true)
 
         when:
         def record = handler.getTraceRecord()

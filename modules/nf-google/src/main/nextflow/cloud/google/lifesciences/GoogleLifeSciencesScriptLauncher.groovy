@@ -31,12 +31,12 @@ import nextflow.processor.TaskRun
  * @author Ólafur Haukur Flygenring <olafurh@wuxinextcode.com>
  */
 @CompileStatic
-class GooglePipelinesScriptLauncher extends BashWrapperBuilder {
+class GoogleLifeSciencesScriptLauncher extends BashWrapperBuilder {
 
-    private GooglePipelinesConfiguration pipelineConfiguration
+    private GoogleLifeSciencesConfiguration pipelineConfiguration
 
-    GooglePipelinesScriptLauncher(TaskBean bean, GooglePipelinesTaskHandler handler) {
-        super(bean, new GooglePipelinesFileCopyStrategy(bean, handler))
+    GoogleLifeSciencesScriptLauncher(TaskBean bean, GoogleLifeSciencesTaskHandler handler) {
+        super(bean, new GoogleLifeSciencesFileCopyStrategy(bean, handler))
         this.pipelineConfiguration = handler.pipelineConfiguration
         // enable the copying of output file to the GS work dir
         scratch = bean.workDir.toString()

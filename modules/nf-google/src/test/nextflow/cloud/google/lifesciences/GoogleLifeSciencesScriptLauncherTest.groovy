@@ -26,7 +26,7 @@ import nextflow.util.MustacheTemplateEngine
  *
  * @author Paolo Di Tommaso <paolo.ditommaso@gmail.com>
  */
-class GooglePipelinesScriptLauncherTest extends GoogleSpecification {
+class GoogleLifeSciencesScriptLauncherTest extends GoogleSpecification {
 
 
     def 'should create task env' () {
@@ -35,8 +35,8 @@ class GooglePipelinesScriptLauncherTest extends GoogleSpecification {
         def session = new Session()
         def bucket = mockGsPath('gs://bucket/work/xx/yy')
         def binDir = mockGsPath('gs://bucket/bin')
-        def config = new GooglePipelinesConfiguration(remoteBinDir: binDir)
-        def handler = [:] as GooglePipelinesTaskHandler
+        def config = new GoogleLifeSciencesConfiguration(remoteBinDir: binDir)
+        def handler = [:] as GoogleLifeSciencesTaskHandler
         handler.pipelineConfiguration = config
         def bean = [
                 name: 'Hello 1',
@@ -46,7 +46,7 @@ class GooglePipelinesScriptLauncherTest extends GoogleSpecification {
                 script: 'echo Hello world!' ] as TaskBean
 
         when:
-        def binding = new GooglePipelinesScriptLauncher(bean, handler).makeBinding()
+        def binding = new GoogleLifeSciencesScriptLauncher(bean, handler).makeBinding()
         then:
         binding.touch_file == null
         binding.stage_cmd == null
@@ -63,8 +63,8 @@ class GooglePipelinesScriptLauncherTest extends GoogleSpecification {
         given:
         def WORK_DIR = mockGsPath('gs://bucket/work/dir')
         def folder = Files.createTempDirectory('test')
-        def config = new GooglePipelinesConfiguration()
-        def handler = [:] as GooglePipelinesTaskHandler
+        def config = new GoogleLifeSciencesConfiguration()
+        def handler = [:] as GoogleLifeSciencesTaskHandler
         handler.pipelineConfiguration = config
         def bean = [name: 'Hello 1',
                     script: 'echo Hello world!',
@@ -73,7 +73,7 @@ class GooglePipelinesScriptLauncherTest extends GoogleSpecification {
          * simple bash run
          */
         when:
-        def wrapper = new GooglePipelinesScriptLauncher(bean, handler) .buildNew0()
+        def wrapper = new GoogleLifeSciencesScriptLauncher(bean, handler) .buildNew0()
 
         then:
         wrapper == load('bash-wrapper-gcp.txt', [folder: WORK_DIR.toString()])
@@ -83,7 +83,7 @@ class GooglePipelinesScriptLauncherTest extends GoogleSpecification {
     }
 
     private String load(String name, Map<String,String> binding=[:]) {
-        def template = new File("src/test/nextflow/cloud/google/pipelines/$name").text
+        def template = new File("src/test/nextflow/cloud/google/lifesciences/$name").text
         return binding ? new MustacheTemplateEngine().render(template, binding) : template
     }
 }

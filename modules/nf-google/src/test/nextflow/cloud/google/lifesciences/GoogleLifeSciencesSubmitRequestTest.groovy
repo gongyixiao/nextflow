@@ -23,12 +23,12 @@ import spock.lang.Specification
  *
  * @author Paolo Di Tommaso <paolo.ditommaso@gmail.com>
  */
-class GooglePipelinesSubmitRequestTest extends Specification {
+class GoogleLifeSciencesSubmitRequestTest extends Specification {
 
     def 'should create wrapper scripts' () {
         when:
         def dir = CloudStorageFileSystem.forBucket("my-bucket").getPath('/work/dir')
-        def req = new GooglePipelinesSubmitRequest(workDir: dir)
+        def req = new GoogleLifeSciencesSubmitRequest(workDir: dir)
         then:
         req.stagingScript ==
                     'set -x; { cd /work/dir; gsutil -m -q cp gs://my-bucket/work/dir/.command.run .; bash .command.run nxf_stage; } 2>&1 > /work/dir/.command.log'

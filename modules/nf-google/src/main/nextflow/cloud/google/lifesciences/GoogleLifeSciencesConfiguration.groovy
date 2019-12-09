@@ -28,7 +28,7 @@ import groovy.transform.PackageScope
  * @author Ólafur Haukur Flygenring <olafurh@wuxinextcode.com>
  */
 @CompileStatic
-class GooglePipelinesConfiguration {
+class GoogleLifeSciencesConfiguration {
     String project
     List<String> zone
     List<String> region
@@ -36,7 +36,7 @@ class GooglePipelinesConfiguration {
     Path remoteBinDir
     String location
 
-    GooglePipelinesConfiguration(String project, List<String> zone,List<String> region, Path remoteBinDir = null, boolean preemptible = false) {
+    GoogleLifeSciencesConfiguration(String project, List<String> zone, List<String> region, Path remoteBinDir = null, boolean preemptible = false) {
         this.project = project
         this.zone = zone
         this.region = region
@@ -48,7 +48,8 @@ class GooglePipelinesConfiguration {
             throw new IllegalArgumentException("Missing Google cloud location")
     }
 
-    @PackageScope GooglePipelinesConfiguration() {}
+    @PackageScope
+    GoogleLifeSciencesConfiguration() {}
 
     @Override
     String toString() {
