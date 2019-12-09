@@ -252,8 +252,7 @@ class BashWrapperBuilder {
         binding.launch_cmd = getLaunchCommand(interpreter,env)
         binding.stage_cmd = getStageCommand()
         binding.unstage_cmd = getUnstageCommand()
-        if( changeDir )
-            binding.unstage_controls = getUnstageControls()
+        binding.unstage_controls = changeDir ? getUnstageControls() : null
 
         if( changeDir || workDir != targetDir ) {
             binding.unstage_outputs = copyStrategy.getUnstageOutputFilesScript(outputFiles,targetDir)
