@@ -1,5 +1,6 @@
 /*
- * Copyright 2013-2019, Centre for Genomic Regulation (CRG)
+ * Copyright 2019, Google Inc
+ * Copyright 2018, WuxiNextcode
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +15,7 @@
  * limitations under the License.
  */
 
-package nextflow.cloud.google.lifesciences.pipelines
+package nextflow.cloud.google.lifesciences
 
 import java.nio.file.Path
 
@@ -51,9 +52,9 @@ class GooglePipelinesTaskHandler extends TaskHandler {
 
     public final static String DEFAULT_COPY_IMAGE = "google/cloud-sdk:alpine"
 
-    nextflow.cloud.google.lifesciences.pipelines.GooglePipelinesExecutor executor
+    GooglePipelinesExecutor executor
 
-    nextflow.cloud.google.lifesciences.pipelines.GooglePipelinesConfiguration pipelineConfiguration
+    GooglePipelinesConfiguration pipelineConfiguration
 
     private TaskBean taskBean
 
@@ -69,9 +70,9 @@ class GooglePipelinesTaskHandler extends TaskHandler {
 
     private String pipelineId
 
-    private nextflow.cloud.google.lifesciences.pipelines.GooglePipelinesHelper helper
+    private GooglePipelinesHelper helper
 
-    GooglePipelinesTaskHandler(TaskRun task, nextflow.cloud.google.lifesciences.pipelines.GooglePipelinesExecutor executor, nextflow.cloud.google.lifesciences.pipelines.GooglePipelinesConfiguration pipelineConfiguration) {
+    GooglePipelinesTaskHandler(TaskRun task, GooglePipelinesExecutor executor, GooglePipelinesConfiguration pipelineConfiguration) {
         super(task)
 
         this.executor = executor
@@ -271,18 +272,18 @@ class GooglePipelinesTaskHandler extends TaskHandler {
 
     @PackageScope
     void createTaskWrapper() {
-        new nextflow.cloud.google.lifesciences.pipelines.GooglePipelinesScriptLauncher(this.taskBean, this) .build()
+        new GooglePipelinesScriptLauncher(this.taskBean, this) .build()
     }
 
     @PackageScope
-    Operation submitPipeline(nextflow.cloud.google.lifesciences.pipelines.GooglePipelinesSubmitRequest request) {
+    Operation submitPipeline(GooglePipelinesSubmitRequest request) {
         helper.submitPipeline(request)
     }
 
     @PackageScope
-    nextflow.cloud.google.lifesciences.pipelines.GooglePipelinesSubmitRequest createPipelineRequest() {
+    GooglePipelinesSubmitRequest createPipelineRequest() {
         //Create the mount for out work files.
-        def req = new nextflow.cloud.google.lifesciences.pipelines.GooglePipelinesSubmitRequest()
+        def req = new GooglePipelinesSubmitRequest()
         req.machineType = getMachineType()
         req.project = pipelineConfiguration.project
         req.zone = pipelineConfiguration.zone

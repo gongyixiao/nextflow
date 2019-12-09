@@ -13,14 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nextflow.cloud.google.lifesciences.pipelines
+package nextflow.cloud.google.lifesciences
 
 import java.nio.file.Path
 
 import com.google.cloud.storage.contrib.nio.CloudStorageFileSystem
 import nextflow.Session
-import nextflow.cloud.google.pipelines.GooglePipelinesExecutor
-import nextflow.cloud.google.pipelines.GooglePipelinesHelper
 import nextflow.exception.AbortOperationException
 import spock.lang.Ignore
 import spock.lang.Shared

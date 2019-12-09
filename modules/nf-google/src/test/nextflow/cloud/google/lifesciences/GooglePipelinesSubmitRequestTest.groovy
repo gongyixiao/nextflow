@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-package nextflow.cloud.google.lifesciences.pipelines
+package nextflow.cloud.google.lifesciences
 
 import com.google.cloud.storage.contrib.nio.CloudStorageFileSystem
-import nextflow.cloud.google.pipelines.GooglePipelinesSubmitRequest
 import spock.lang.Specification
 
 /**

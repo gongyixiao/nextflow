@@ -1,5 +1,6 @@
 /*
- * Copyright 2013-2019, Centre for Genomic Regulation (CRG)
+ * Copyright 2019, Google Inc
+ * Copyright 2018, WuxiNextcode
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +15,7 @@
  * limitations under the License.
  */
 
-package nextflow.cloud.google.lifesciences.pipelines
+package nextflow.cloud.google.lifesciences
 
 import java.nio.file.Path
 
@@ -32,10 +33,10 @@ import nextflow.processor.TaskRun
 @CompileStatic
 class GooglePipelinesScriptLauncher extends BashWrapperBuilder {
 
-    private nextflow.cloud.google.lifesciences.pipelines.GooglePipelinesConfiguration pipelineConfiguration
+    private GooglePipelinesConfiguration pipelineConfiguration
 
     GooglePipelinesScriptLauncher(TaskBean bean, GooglePipelinesTaskHandler handler) {
-        super(bean, new nextflow.cloud.google.lifesciences.pipelines.GooglePipelinesFileCopyStrategy(bean, handler))
+        super(bean, new GooglePipelinesFileCopyStrategy(bean, handler))
         this.pipelineConfiguration = handler.pipelineConfiguration
         // enable the copying of output file to the GS work dir
         scratch = bean.workDir.toString()

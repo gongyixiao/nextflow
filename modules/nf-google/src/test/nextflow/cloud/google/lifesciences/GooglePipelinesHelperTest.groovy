@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nextflow.cloud.google.lifesciences.pipelines
+package nextflow.cloud.google.lifesciences
 
-import static nextflow.cloud.google.pipelines.GooglePipelinesHelper.*
+import static nextflow.cloud.google.lifesciences.GooglePipelinesHelper.*
 
 import com.google.api.services.lifesciences.v2beta.CloudLifeSciences
 import com.google.api.services.lifesciences.v2beta.model.Action
@@ -26,8 +26,6 @@ import com.google.api.services.lifesciences.v2beta.model.Pipeline
 import com.google.api.services.lifesciences.v2beta.model.Resources
 import com.google.api.services.lifesciences.v2beta.model.RunPipelineRequest
 import com.google.auth.oauth2.GoogleCredentials
-import nextflow.cloud.google.pipelines.GooglePipelinesHelper
-import nextflow.cloud.google.pipelines.GooglePipelinesSubmitRequest
 import nextflow.executor.res.AcceleratorResource
 import spock.lang.Specification
 

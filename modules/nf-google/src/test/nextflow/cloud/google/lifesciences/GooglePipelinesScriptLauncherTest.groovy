@@ -14,15 +14,12 @@
  * limitations under the License.
  */
 
-package nextflow.cloud.google.lifesciences.pipelines
+package nextflow.cloud.google.lifesciences
 
 import java.nio.file.Files
 
 import nextflow.Session
 import nextflow.cloud.google.GoogleSpecification
-import nextflow.cloud.google.pipelines.GooglePipelinesConfiguration
-import nextflow.cloud.google.pipelines.GooglePipelinesScriptLauncher
-import nextflow.cloud.google.pipelines.GooglePipelinesTaskHandler
 import nextflow.processor.TaskBean
 import nextflow.util.MustacheTemplateEngine
 /**

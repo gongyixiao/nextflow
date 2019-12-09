@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nextflow.cloud.google.lifesciences.pipelines
+package nextflow.cloud.google.lifesciences
 
 import java.nio.file.Paths
 
@@ -22,11 +22,6 @@ import com.google.api.services.lifesciences.v2beta.model.Metadata
 import com.google.api.services.lifesciences.v2beta.model.Operation
 import nextflow.Session
 import nextflow.cloud.google.GoogleSpecification
-import nextflow.cloud.google.pipelines.GooglePipelinesConfiguration
-import nextflow.cloud.google.pipelines.GooglePipelinesExecutor
-import nextflow.cloud.google.pipelines.GooglePipelinesHelper
-import nextflow.cloud.google.pipelines.GooglePipelinesSubmitRequest
-import nextflow.cloud.google.pipelines.GooglePipelinesTaskHandler
 import nextflow.cloud.types.PriceModel
 import nextflow.exception.ProcessUnrecoverableException
 import nextflow.executor.Executor

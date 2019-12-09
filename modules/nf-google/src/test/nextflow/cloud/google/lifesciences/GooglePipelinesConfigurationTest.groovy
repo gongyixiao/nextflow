@@ -13,9 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nextflow.cloud.google.lifesciences.pipelines
+package nextflow.cloud.google.lifesciences
 
-import nextflow.cloud.google.pipelines.GooglePipelinesConfiguration
 import spock.lang.Specification
 
 class GooglePipelinesConfigurationTest extends Specification {

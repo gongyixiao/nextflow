@@ -1,5 +1,6 @@
 /*
- * Copyright 2013-2019, Centre for Genomic Regulation (CRG)
+ * Copyright 2019, Google Inc
+ * Copyright 2018, WuxiNextcode
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +15,7 @@
  * limitations under the License.
  */
 
-package nextflow.cloud.google.lifesciences.pipelines
+package nextflow.cloud.google.lifesciences
 
 import java.nio.file.Path
 
@@ -49,7 +50,7 @@ class GooglePipelinesExecutor extends Executor {
 
     private GooglePipelinesConfiguration pipelineConfig
 
-    private nextflow.cloud.google.lifesciences.pipelines.GooglePipelinesHelper helper
+    private GooglePipelinesHelper helper
 
     Map env = new HashMap(System.getenv())
 
@@ -81,7 +82,7 @@ class GooglePipelinesExecutor extends Executor {
     }
 
     @PackageScope
-    nextflow.cloud.google.lifesciences.pipelines.GooglePipelinesHelper getHelper() { return helper }
+    GooglePipelinesHelper getHelper() { return helper }
 
     private void initialize0() {
 
@@ -142,6 +143,6 @@ class GooglePipelinesExecutor extends Executor {
                 remoteBinDir,
                 session.config.navigate("cloud.preemptible") as boolean )
 
-        helper = new nextflow.cloud.google.lifesciences.pipelines.GooglePipelinesHelper().init()
+        helper = new GooglePipelinesHelper().init()
     }
 }
