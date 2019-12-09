@@ -14,38 +14,24 @@
  * limitations under the License.
  */
 
-package nextflow.extension
-
-import spock.lang.Specification
-import spock.lang.Unroll
+package nextflow.cloud.google.lifesciences.pipelines
 
 import java.nio.file.Path
 
-import com.google.cloud.storage.contrib.nio.CloudStoragePath
+import groovy.transform.CompileStatic
+import nextflow.util.Escape
 
 /**
+ * Simple trait to escape remote and local task work dir
  *
  * @author Paolo Di Tommaso <paolo.ditommaso@gmail.com>
  */
-class FilesExTest2 extends Specification {
+@CompileStatic
+trait TaskDirWrangler {
 
-    @Unroll
-    def 'should return uri string for #PATH' () {
+    abstract Path getWorkDir()
 
-        when:
-        def path = PATH as Path
-        then:
-        path instanceof CloudStoragePath
-        println FilesEx.toUriString(path)
-        FilesEx.toUriString(path) == PATH
+    String getLocalTaskDir() { Escape.path(workDir) }
 
-        where:
-        PATH                    | _
-        'gs://foo/bar'          | _
-        'gs://foo'              | _
-        'gs://foo/'             | _
-        'gs://foo/bar/baz'      | _
-        'gs://foo/bar/baz/'     | _
-        'gs://foo/bar - baz/'   | _
-    }
+    String getRemoteTaskDir() { Escape.uriPath(workDir) }
 }
