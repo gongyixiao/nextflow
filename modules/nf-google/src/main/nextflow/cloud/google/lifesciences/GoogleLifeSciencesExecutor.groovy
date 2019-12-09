@@ -44,7 +44,7 @@ import nextflow.util.ServiceName
  */
 @Slf4j
 @CompileStatic
-@ServiceName('google-pipelines')
+@ServiceName('google-lifesciences')
 @SupportedScriptTypes(ScriptType.SCRIPTLET)
 class GoogleLifeSciencesExecutor extends Executor {
 
@@ -68,7 +68,7 @@ class GoogleLifeSciencesExecutor extends Executor {
     protected void register() {
         super.register()
         initialize0()
-        log.debug "[GPAPI] Pipelines Configuration: '$pipelineConfig'"
+        log.debug "[GLS] Pipelines Configuration: '$pipelineConfig'"
     }
 
     @Override

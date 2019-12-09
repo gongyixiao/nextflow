@@ -32,7 +32,7 @@ import nextflow.processor.TaskRun
  */
 @CompileStatic
 @ToString(includeNames = true)
-class GoogleLifeSciencesSubmitRequest implements LifeSciencesTaskDirWrangler {
+class GoogleLifeSciencesSubmitRequest implements GoogleLifeSciencesTaskDirWrangler {
 
     String machineType
 

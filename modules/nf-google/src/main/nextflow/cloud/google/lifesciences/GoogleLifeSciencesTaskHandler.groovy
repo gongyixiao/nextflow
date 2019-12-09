@@ -106,7 +106,7 @@ class GoogleLifeSciencesTaskHandler extends TaskHandler {
     protected String getMachineType() {
         String machineType = getMachineType0(task.config.getMachineType(), task.config.getCpus(), task.config.getMemory())
 
-        log.trace "[GPAPI] Task: $task.name - Instance Type: $machineType"
+        log.trace "[GLS] Task: $task.name - Instance Type: $machineType"
 
         return machineType
     }
@@ -137,11 +137,11 @@ class GoogleLifeSciencesTaskHandler extends TaskHandler {
         }
 
         if( warns ) {
-            log.debug "[GPAPI] New event > $task.name - Pipeline Id: $pipelineId\n${prettyPrint(events)}"
+            log.debug "[GLS] New event > $task.name - Pipeline Id: $pipelineId\n${prettyPrint(events)}"
             for( String w : warns ) log.warn1("Google Pipelines > $w")
         }
         else if( log.isTraceEnabled() ) {
-            log.trace "[GPAPI] New event > $task.name - Pipeline Id: $pipelineId\n${prettyPrint(events)}"
+            log.trace "[GLS] New event > $task.name - Pipeline Id: $pipelineId\n${prettyPrint(events)}"
         }
 
     }
@@ -186,7 +186,7 @@ class GoogleLifeSciencesTaskHandler extends TaskHandler {
         logEvents(operation)
 
         if (operation.getDone()) {
-            log.debug "[GPAPI] Task complete > $task.name - Start Time: ${metadata?.getStartTime()} - End Time: ${metadata?.getEndTime()}"
+            log.debug "[GLS] Task complete > $task.name - Start Time: ${metadata?.getStartTime()} - End Time: ${metadata?.getEndTime()}"
 
             // finalize the task
             Integer xs = readExitFile()
@@ -232,7 +232,7 @@ class GoogleLifeSciencesTaskHandler extends TaskHandler {
             exitFile.text as Integer
         }
         catch (Exception e) {
-            log.debug "[GPAPI] Cannot read exitstatus for task: `$task.name` | ${e.message}"
+            log.debug "[GLS] Cannot read exitstatus for task: `$task.name` | ${e.message}"
             null
         }
     }
@@ -240,7 +240,7 @@ class GoogleLifeSciencesTaskHandler extends TaskHandler {
     @Override
     void kill() {
         if( !operation ) return
-        log.debug "[GPAPI] Killing task > $task.name - Pipeline Id: $pipelineId"
+        log.debug "[GLS] Killing task > $task.name - Pipeline Id: $pipelineId"
         helper.cancelOperation(operation)
     }
 
@@ -248,7 +248,7 @@ class GoogleLifeSciencesTaskHandler extends TaskHandler {
     void submit() {
         createTaskWrapper()
         final req = createPipelineRequest()
-        log.trace "[GPAPI] Task created > $task.name - Request: $req"
+        log.trace "[GLS] Task created > $task.name - Request: $req"
 
         operation = submitPipeline(req)
         if( operation == null )
@@ -257,10 +257,10 @@ class GoogleLifeSciencesTaskHandler extends TaskHandler {
         status = TaskStatus.SUBMITTED
 
         if( log.isTraceEnabled() ) {
-            log.trace "[GPAPI] Task submitted > $task.name - Pipeline Id: $pipelineId; Operation:\n${prettyPrint(operation)}"
+            log.trace "[GLS] Task submitted > $task.name - Pipeline Id: $pipelineId; Operation:\n${prettyPrint(operation)}"
         }
         else {
-            log.debug "[GPAPI] Task submitted > $task.name - Pipeline Id: $pipelineId"
+            log.debug "[GLS] Task submitted > $task.name - Pipeline Id: $pipelineId"
         }
     }
 
